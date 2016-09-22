@@ -49,7 +49,7 @@ const WallpaperPreviews = new Lang.Class({
             style_class: 'label-thumb'
         }));
 
-        box.add_actor(new Thumb.Thumbnail(wallpaper, Lang.bind(this, this._viewWallpaper)).actor);
+        box.add_child(new Thumb.Thumbnail(wallpaper, Lang.bind(this, this._viewWallpaper)));
 
         this.mainBox.add_child(box);
     },

@@ -1,6 +1,8 @@
 const Lang = imports.lang;
 const St = imports.gi.St;
 
+const PopupMenu = imports.ui.popupMenu;
+
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 
@@ -8,12 +10,13 @@ const THUMBNAIL_WIDTH = 200;
 
 const Thumbnail = new Lang.Class({
     Name: 'Thumbnail',
-    actor: {},
-    
-    _icon: {},
+    Extends: St.Button,
+
     _clickCallback: null,
 
     _init: function(gicon, clickCallback) {
+        this.parent({ x_expand: true });
+
         this._clickCallback = clickCallback;
 
         this._thumbnail = new St.Icon({
@@ -22,12 +25,9 @@ const Thumbnail = new Lang.Class({
             height: THUMBNAIL_WIDTH * Utils.getScreenAspectRatio()
         });
 
-        this.actor = new St.Button({
-            child: this._thumbnail,
-            x_expand: true
-        });
+        this.add_actor(this._thumbnail);
 
-        this.actor.connect('clicked', Lang.bind(this, this._onClick));
+        this.connect('clicked', Lang.bind(this, this._onClick));
     },
 
     _onClick: function(object) {
