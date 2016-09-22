@@ -1,10 +1,8 @@
 const Lang = imports.lang;
 const St = imports.gi.St;
-
 const PopupMenu = imports.ui.popupMenu;
-
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Utils = Me.imports.utils;
+const WallpaperUtils = Me.imports.wallpaperUtils;
 
 const THUMBNAIL_WIDTH = 200;
 
@@ -17,7 +15,7 @@ const Thumbnail = new Lang.Class({
             gicon: image,
             icon_size: THUMBNAIL_WIDTH,
             style_class: 'wall-thumbnail',
-            height: THUMBNAIL_WIDTH * Utils.getScreenAspectRatio()
+            height: THUMBNAIL_WIDTH * WallpaperUtils.getScreenAspectRatio()
         });
     }
 });
@@ -48,7 +46,7 @@ const PopupWallpaperButton = new Lang.Class({
     _viewWallpaper: function() {
         this._getTopMenu().close();
 
-        Utils.setWallpaper(this.wallpaper);
+        WallpaperUtils.setWallpaper(this.wallpaper);
 
         // let uri = this.wallpaper.get_file().get_uri()
         // Utils.launchForUri(uri);

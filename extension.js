@@ -13,6 +13,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
 const WallpaperButton = Me.imports.wallpaperButton;
+const WallpaperUtils = Me.imports.wallpaperUtils;
 
 const wallpaperLocation = Me.dir.get_path() + '/wallpapers/'
 
@@ -54,7 +55,7 @@ const WallerIndicator = new Lang.Class({
     },
 
     _setupMenu: function() {
-        let wallpaper = Utils.getCurrentWallpaper();
+        let wallpaper = WallpaperUtils.getCurrentWallpaper();
         let wallpaper2 = new Gio.FileIcon({ file: Gio.File.new_for_path(wallpaperLocation + "wall.jpg")});
         this.menu.addMenuItem(new WallpaperButton.PopupWallpaperButton('Desktop', wallpaper));
         this.menu.addMenuItem(new WallpaperButton.PopupWallpaperButton('Lockscreen', wallpaper2));
