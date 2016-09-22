@@ -52,8 +52,6 @@ const PopupWallpaperButton = new Lang.Class({
         this._getTopMenu().close();
 
         WallpaperUtils.setWallpaper(this._thumbnail.get_gicon());
-
-        // let uri = this.wallpaper.get_file().get_uri()
-        // Utils.launchForUri(uri);
+        WallpaperUtils.setLockscreenWallpaper(this._thumbnail.get_gicon());
     }
 });

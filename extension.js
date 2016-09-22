@@ -52,7 +52,7 @@ const WallerIndicator = new Lang.Class({
     },
 
     _setupMenu: function() {
-        let wallpaper = WallpaperUtils.getCurrentWallpaper();
+        let wallpaper = WallpaperUtils.getWallpaper();
         let wallpaper2 = new Gio.FileIcon({ file: Gio.File.new_for_path(wallpaperLocation + "wall.jpg")});
 
         this.menu.addMenuItem(new WallpaperButton.PopupWallpaperButton('Next Desktop Wallpaper', wallpaper));
