@@ -24,46 +24,33 @@ let wallerIndicator;
 function init() {
 }
 
-const WallpaperPreviews = new Lang.Class({
-    Name: 'WallpaperPreviews',
+const PopupWallpaperButton = new Lang.Class({
+    Name: 'PopupWallpaperButton',
     Extends: PopupMenu.PopupBaseMenuItem,
 
-    _init: function() {
+    _init: function(text, image) {
         this.parent();
 
-        this.mainBox = new St.BoxLayout({ vertical: false });
+        this.image = image;
 
-        let wallpaper = Utils.getCurrentWallpaper();
-
-        this._addWallpaperPreview('Desktop', wallpaper);
-        this._addWallpaperPreview('Lockscreen', wallpaper);
-
-        this.actor.add_actor(this.mainBox);
-    },
-
-    _addWallpaperPreview: function(title, wallpaper) {
         let box = new St.BoxLayout({ vertical: true });
 
         box.add_child(new St.Label({
-            text: title,
+            text: text,
             style_class: 'label-thumb'
         }));
 
-        box.add_child(new Thumb.Thumbnail(wallpaper, Lang.bind(this, this._viewWallpaper)));
+        box.add_child(new Thumb.Thumbnail(image));
 
-        this.mainBox.add_child(box);
+        this.actor.add_actor(box);
+
+        this.connect('activate', Lang.bind(this, this._viewImage));
     },
 
-    // _getWallpaper: function() {
-    //     return new Gio.FileIcon({
-    //         file: Gio.File.new_for_path(wallpaperLocation + "wall.jpg")
-    //     })
-    // },
+    _viewImage: function() {
+        this._getTopMenu().close();
 
-    _viewWallpaper: function(wallpaper) {
-        wallerIndicator.close();
-
-        let uri = wallpaper.get_file().get_uri()
+        let uri = this.image.get_file().get_uri()
         Utils.launchForUri(uri);
     }
 });
@@ -99,7 +86,9 @@ const WallerIndicator = new Lang.Class({
     },
 
     _setupMenu: function() {
-        this.menu.addMenuItem(new WallpaperPreviews());
+        let wallpaper = Utils.getCurrentWallpaper();
+        this.menu.addMenuItem(new PopupWallpaperButton('Desktop', wallpaper));
+        this.menu.addMenuItem(new PopupWallpaperButton('Lockscreen', wallpaper));
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
@@ -128,10 +117,6 @@ const WallerIndicator = new Lang.Class({
     _openWallpapersFolder: function() {
         Utils.launchForUri(GLib.filename_to_uri(wallpaperLocation, ''));
     },
-
-    close: function() {
-        this.menu.close();
-    }
 });
 
 function enable() {
