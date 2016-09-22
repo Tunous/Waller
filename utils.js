@@ -1,6 +1,10 @@
 const Gio = imports.gi.Gio;
-
+const Gdk = imports.gi.Gdk
 const ExtensionUtils = imports.misc.extensionUtils;
+
+const BACKGROUND_SETTING_SCHEMA = 'org.gnome.desktop.background';
+const SETTING_BACKGROUND_MODE = 'picture-options';
+const SETTING_WALLPAPER_URI = 'picture-uri';
 
 function getSettings() {
     let extension = ExtensionUtils.getCurrentExtension();
@@ -25,4 +29,35 @@ function getSettings() {
     }
 
     return new Gio.Settings({ settings_schema: schemaObj });
+}
+
+function getScreenAspectRatio() {
+    let backgroundSetting = new Gio.Settings({
+        schema: BACKGROUND_SETTING_SCHEMA
+    });
+    let backgroundMode = backgroundSetting.get_string(SETTING_BACKGROUND_MODE);
+
+    if (backgroundMode == 'spanned') {
+        return Gdk.Screen.height() / Gdk.Screen.width();
+    }
+
+    let screen = Gdk.Screen.get_default();
+    let monitor = screen.get_monitor_geometry(screen.get_primary_monitor());
+    return monitor.height / monitor.width;
+}
+
+function getCurrentWallpaper() {
+    let backgroundSetting = new Gio.Settings({
+        schema: BACKGROUND_SETTING_SCHEMA
+    });
+    let pathFromUri = decodeURIComponent(backgroundSetting.get_string(SETTING_WALLPAPER_URI))
+        .replace(/^file:\/\//g, '');
+
+    return new Gio.FileIcon({ file: Gio.File.new_for_path(pathFromUri) });
+}
+
+function launchForUri(uri) {
+    let now = new Date().getTime() / 1000;
+    Gio.AppInfo.launch_default_for_uri(uri,
+        global.create_app_launch_context(now, -1));
 }

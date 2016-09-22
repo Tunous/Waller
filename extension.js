@@ -11,14 +11,50 @@ const PopupMenu = imports.ui.popupMenu;
 const Util = imports.misc.util;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
+
 const Utils = Me.imports.utils;
+const Thumb = Me.imports.thumb;
 
 const wallpaperLocation = Me.dir.get_path() + '/wallpapers/'
 
 let SHOW_PANEL_ICON = true;
 
+let wallerIndicator;
+
 function init() {
 }
+
+const WallpaperPreviews = new Lang.Class({
+    Name: 'WallpaperPreviews',
+    Extends: PopupMenu.PopupBaseMenuItem,
+
+    _init: function() {
+        this.parent();
+
+        let mainBox = new St.BoxLayout({ vertical: false });
+        let desktopBox = new St.BoxLayout({ vertical: true });
+
+        let wallpaper = Utils.getCurrentWallpaper();
+        this.wallpaperThumb = new Thumb.Thumbnail(wallpaper, Lang.bind(this, this._viewWallpaper));
+
+        desktopBox.add_actor(this.wallpaperThumb.actor);
+        mainBox.add_child(desktopBox);
+        this.actor.add_actor(mainBox);
+    },
+
+    _getWallpaper: function() {
+        return new Gio.FileIcon({
+            file: Gio.File.new_for_path(wallpaperLocation + "wall.jpg")
+        })
+    },
+
+    _viewWallpaper: function() {
+        wallerIndicator.close();
+
+        let uri = Utils.getCurrentWallpaper().get_file().get_uri()
+        Utils.launchForUri(uri);
+    }
+});
 
 const WallerIndicator = new Lang.Class({
     Name: 'WallerIndicator',
@@ -51,9 +87,13 @@ const WallerIndicator = new Lang.Class({
     },
 
     _setupMenu: function() {
+        this.menu.addMenuItem(new WallpaperPreviews());
+
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
         let openWallpaperFolderMenuItem = new PopupMenu.PopupMenuItem('Open Wallpaper Folder');
         this.menu.addMenuItem(openWallpaperFolderMenuItem);
-        openWallpaperFolderMenuItem.connect('activate', Lang.bind(this, this._openWallpapers));
+        openWallpaperFolderMenuItem.connect('activate', Lang.bind(this, this._openWallpapersFolder));
 
         let settingsMenuItem = new PopupMenu.PopupMenuItem('Settings');
         this.menu.addMenuItem(settingsMenuItem);
@@ -73,14 +113,14 @@ const WallerIndicator = new Lang.Class({
         this.actor.visible = SHOW_PANEL_ICON;
     },
 
-    _openWallpapers: function() {
-        let now = new Date().getTime() / 1000;
-        let uri = GLib.filename_to_uri(wallpaperLocation, '');
-        Gio.AppInfo.launch_default_for_uri(uri, global.create_app_launch_context(now, -1));
+    _openWallpapersFolder: function() {
+        Utils.launchForUri(GLib.filename_to_uri(wallpaperLocation, ''));
+    },
+
+    close: function() {
+        this.menu.close();
     }
 });
-
-let wallerIndicator;
 
 function enable() {
     wallerIndicator = new WallerIndicator();
