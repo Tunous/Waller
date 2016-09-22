@@ -54,8 +54,9 @@ const WallerIndicator = new Lang.Class({
     _setupMenu: function() {
         let wallpaper = WallpaperUtils.getCurrentWallpaper();
         let wallpaper2 = new Gio.FileIcon({ file: Gio.File.new_for_path(wallpaperLocation + "wall.jpg")});
-        this.menu.addMenuItem(new WallpaperButton.PopupWallpaperButton('Desktop', wallpaper));
-        this.menu.addMenuItem(new WallpaperButton.PopupWallpaperButton('Lockscreen', wallpaper2));
+
+        this.menu.addMenuItem(new WallpaperButton.PopupWallpaperButton('Next Desktop Wallpaper', wallpaper));
+        this.menu.addMenuItem(new WallpaperButton.PopupWallpaperButton('Next Lockscreen Wallpaper', wallpaper2));
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 

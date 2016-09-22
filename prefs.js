@@ -1,7 +1,7 @@
 const Gtk = imports.gi.Gtk;
 const Gio = imports.gi.Gio;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Utils = Me.imports.utils;
+const Utils = Me.imports.assets.utils;
 
 let settings;
 

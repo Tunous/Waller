@@ -28,8 +28,6 @@ const PopupWallpaperButton = new Lang.Class({
     _init: function(text, wallpaper) {
         this.parent();
 
-        this.wallpaper = wallpaper;
-
         let box = new St.BoxLayout({ vertical: true });
 
         box.add_child(new St.Label({
@@ -37,17 +35,23 @@ const PopupWallpaperButton = new Lang.Class({
             style_class: 'label-thumb'
         }));
 
-        box.add_child(new Thumbnail(wallpaper));
+        this._thumbnail = new Thumbnail(wallpaper);
+
+        box.add_child(this._thumbnail);
 
         this.actor.add_actor(box);
 
         this.connect('activate', Lang.bind(this, this._viewWallpaper));
     },
 
+    setPreview: function(wallpaper) {
+        this._thumbnail.set_gicon(wallpaper);
+    },
+
     _viewWallpaper: function() {
         this._getTopMenu().close();
 
-        WallpaperUtils.setWallpaper(this.wallpaper);
+        WallpaperUtils.setWallpaper(this._thumbnail.get_gicon());
 
         // let uri = this.wallpaper.get_file().get_uri()
         // Utils.launchForUri(uri);
