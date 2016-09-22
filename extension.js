@@ -11,10 +11,11 @@ const PopupMenu = imports.ui.popupMenu;
 const Util = imports.misc.util;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
+const Utils = Me.imports.utils;
 
 const wallpaperLocation = Me.dir.get_path() + '/wallpapers/'
 
-let PANEL_ICON_VISIBLE = true;
+let SHOW_PANEL_ICON = true;
 
 function init() {
 }
@@ -29,7 +30,9 @@ const WallerIndicator = new Lang.Class({
         this._setupPanelIcon();
         this._setupMenu();
 
-        this.actor.visible = PANEL_ICON_VISIBLE;
+        this._settings = Utils.getSettings();
+        this._settingsChangedId = this._settings.connect('changed', Lang.bind(this, this._applySettings));
+        this._applySettings();
     },
 
     _setupPanelIcon: function() {
@@ -59,6 +62,15 @@ const WallerIndicator = new Lang.Class({
 
     _openSettings: function() {
         Util.spawn(["gnome-shell-extension-prefs", Me.uuid]);
+    },
+
+    _applySettings: function() {
+        SHOW_PANEL_ICON = this._settings.get_boolean('show-panel-icon');
+        this._updatePanelIconVisibility();
+    },
+
+    _updatePanelIconVisibility: function() {
+        this.actor.visible = SHOW_PANEL_ICON;
     },
 
     _openWallpapers: function() {

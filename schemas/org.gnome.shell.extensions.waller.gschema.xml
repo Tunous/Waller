@@ -1,0 +1,13 @@
+<schemalist gettext-domain="gnome-shell-extensions">
+    <schema id="org.gnome.shell.extensions.waller"
+        path="/org/gnome/shell/extensions/waller/">
+
+        <key name="show-panel-icon" type="b">
+            <default>true</default>
+            <summary>Show panel icon</summary>
+            <description>
+                If true, show icon in main panel
+            </description>
+        </key>
+    </schema>
+</schemalist>
