@@ -11,9 +11,8 @@ const PopupMenu = imports.ui.popupMenu;
 const Util = imports.misc.util;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-
 const Utils = Me.imports.utils;
-const Thumb = Me.imports.thumb;
+const WallpaperButton = Me.imports.wallpaperButton;
 
 const wallpaperLocation = Me.dir.get_path() + '/wallpapers/'
 
@@ -23,37 +22,6 @@ let wallerIndicator;
 
 function init() {
 }
-
-const PopupWallpaperButton = new Lang.Class({
-    Name: 'PopupWallpaperButton',
-    Extends: PopupMenu.PopupBaseMenuItem,
-
-    _init: function(text, image) {
-        this.parent();
-
-        this.image = image;
-
-        let box = new St.BoxLayout({ vertical: true });
-
-        box.add_child(new St.Label({
-            text: text,
-            style_class: 'label-thumb'
-        }));
-
-        box.add_child(new Thumb.Thumbnail(image));
-
-        this.actor.add_actor(box);
-
-        this.connect('activate', Lang.bind(this, this._viewImage));
-    },
-
-    _viewImage: function() {
-        this._getTopMenu().close();
-
-        let uri = this.image.get_file().get_uri()
-        Utils.launchForUri(uri);
-    }
-});
 
 const WallerIndicator = new Lang.Class({
     Name: 'WallerIndicator',
@@ -87,8 +55,9 @@ const WallerIndicator = new Lang.Class({
 
     _setupMenu: function() {
         let wallpaper = Utils.getCurrentWallpaper();
-        this.menu.addMenuItem(new PopupWallpaperButton('Desktop', wallpaper));
-        this.menu.addMenuItem(new PopupWallpaperButton('Lockscreen', wallpaper));
+        let wallpaper2 = new Gio.FileIcon({ file: Gio.File.new_for_path(wallpaperLocation + "wall.jpg")});
+        this.menu.addMenuItem(new WallpaperButton.PopupWallpaperButton('Desktop', wallpaper));
+        this.menu.addMenuItem(new WallpaperButton.PopupWallpaperButton('Lockscreen', wallpaper2));
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 

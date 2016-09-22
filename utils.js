@@ -61,3 +61,12 @@ function launchForUri(uri) {
     Gio.AppInfo.launch_default_for_uri(uri,
         global.create_app_launch_context(now, -1));
 }
+
+function getBackgroundSetting() {
+    return new Gio.Settings({ schema: BACKGROUND_SETTING_SCHEMA });
+}
+
+function setWallpaper(wallpaper) {
+    let backgroundSetting = getBackgroundSetting();
+    backgroundSetting.set_string(SETTING_WALLPAPER_URI, wallpaper.get_file().get_uri());
+}
