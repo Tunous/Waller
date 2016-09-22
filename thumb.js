@@ -32,7 +32,7 @@ const Thumbnail = new Lang.Class({
 
     _onClick: function(object) {
         if (this._clickCallback != undefined && this._clickCallback != null) {
-            this._clickCallback();
+            this._clickCallback(this._thumbnail.get_gicon());
         }
     },
 

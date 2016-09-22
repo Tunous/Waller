@@ -31,27 +31,39 @@ const WallpaperPreviews = new Lang.Class({
     _init: function() {
         this.parent();
 
-        let mainBox = new St.BoxLayout({ vertical: false });
-        let desktopBox = new St.BoxLayout({ vertical: true });
+        this.mainBox = new St.BoxLayout({ vertical: false });
 
         let wallpaper = Utils.getCurrentWallpaper();
-        this.wallpaperThumb = new Thumb.Thumbnail(wallpaper, Lang.bind(this, this._viewWallpaper));
 
-        desktopBox.add_actor(this.wallpaperThumb.actor);
-        mainBox.add_child(desktopBox);
-        this.actor.add_actor(mainBox);
+        this._addWallpaperPreview('Desktop', wallpaper);
+        this._addWallpaperPreview('Lockscreen', wallpaper);
+
+        this.actor.add_actor(this.mainBox);
     },
 
-    _getWallpaper: function() {
-        return new Gio.FileIcon({
-            file: Gio.File.new_for_path(wallpaperLocation + "wall.jpg")
-        })
+    _addWallpaperPreview: function(title, wallpaper) {
+        let box = new St.BoxLayout({ vertical: true });
+
+        box.add_child(new St.Label({
+            text: title,
+            style_class: 'label-thumb'
+        }));
+
+        box.add_actor(new Thumb.Thumbnail(wallpaper, Lang.bind(this, this._viewWallpaper)).actor);
+
+        this.mainBox.add_child(box);
     },
 
-    _viewWallpaper: function() {
+    // _getWallpaper: function() {
+    //     return new Gio.FileIcon({
+    //         file: Gio.File.new_for_path(wallpaperLocation + "wall.jpg")
+    //     })
+    // },
+
+    _viewWallpaper: function(wallpaper) {
         wallerIndicator.close();
 
-        let uri = Utils.getCurrentWallpaper().get_file().get_uri()
+        let uri = wallpaper.get_file().get_uri()
         Utils.launchForUri(uri);
     }
 });
