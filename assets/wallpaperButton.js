@@ -1,8 +1,9 @@
 const Lang = imports.lang;
 const St = imports.gi.St;
 const PopupMenu = imports.ui.popupMenu;
+
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-const WallpaperUtils = Me.imports.wallpaperUtils;
+const WallpaperUtils = Me.imports.assets.wallpaperUtils;
 
 const THUMBNAIL_WIDTH = 200;
 

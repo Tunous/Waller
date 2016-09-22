@@ -1,19 +1,16 @@
 const Lang = imports.lang;
-
 const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const St = imports.gi.St;
-
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
-
 const Util = imports.misc.util;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
-const Utils = Me.imports.utils;
-const WallpaperButton = Me.imports.wallpaperButton;
-const WallpaperUtils = Me.imports.wallpaperUtils;
+
+const Me = imports.misc.extensionUtils.getCurrentExtension();
+const Utils = Me.imports.assets.utils;
+const WallpaperButton = Me.imports.assets.wallpaperButton;
+const WallpaperUtils = Me.imports.assets.wallpaperUtils;
 
 const wallpaperLocation = Me.dir.get_path() + '/wallpapers/'
 
