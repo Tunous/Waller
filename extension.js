@@ -16,6 +16,7 @@ const WallpaperDownloader = Me.imports.assets.wallpaperDownloader;
 const wallpaperLocation = Me.dir.get_path() + '/wallpapers/'
 
 let SHOW_PANEL_ICON = true;
+let DOWNLOAD_INTERVAL = 60;
 
 let wallerIndicator;
 
@@ -92,11 +93,10 @@ const WallerIndicator = new Lang.Class({
 
     _applySettings: function () {
         SHOW_PANEL_ICON = this._settings.get_boolean('show-panel-icon');
-        this._updatePanelIconVisibility();
-    },
+        DOWNLOAD_INTERVAL = this._settings.get_int('interval');
 
-    _updatePanelIconVisibility: function () {
         this.actor.visible = SHOW_PANEL_ICON;
+        this.wallpaperDownloader.timer.setInterval(DOWNLOAD_INTERVAL);
     },
 
     _openWallpapersFolder: function () {

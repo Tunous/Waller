@@ -9,5 +9,13 @@
                 If true, show icon in main panel
             </description>
         </key>
+
+        <key name="interval" type="i">
+            <default>60</default>
+            <summary>Interval (in seconds)</summary>
+            <description>
+                The interval of wallpaper updates
+            </description>
+        </key>
     </schema>
 </schemalist>

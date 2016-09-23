@@ -5,11 +5,8 @@ const Timer = new Lang.Class({
     Name: 'Timer',
 
     _callback: null,
-    _timeout: 180,
+    _interval: 360,
     _timerId: null,
-
-    _init: function() {
-    },
 
     setCallback: function(callback) {
         if (callback === undefined || callback === null || typeof callback !== 'function') {
@@ -19,9 +16,14 @@ const Timer = new Lang.Class({
         this._callback = callback;
     },
 
+    setInterval: function(interval) {
+        this._interval = interval * 60;
+        this.start();
+    },
+
     start: function() {
         this.stop();
-        this._timerId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, this._timeout, this._callback);
+        this._timerId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, this._interval, this._callback);
     },
 
     stop: function() {

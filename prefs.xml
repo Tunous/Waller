@@ -2,6 +2,13 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
+  <object class="GtkAdjustment" id="intervalAdjustement">
+    <property name="lower">1</property>
+    <property name="upper">3000</property>
+    <property name="value">60</property>
+    <property name="step_increment">1</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkGrid" id="window">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -30,7 +37,7 @@
           </packing>
         </child>
         <child>
-          <object class="GtkSwitch" id="showPanelIconSwitch">
+          <object class="GtkSwitch" id="showPanelIcon">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="active">True</property>
@@ -45,6 +52,48 @@
       <packing>
         <property name="left_attach">0</property>
         <property name="top_attach">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="hexpand">True</property>
+        <property name="spacing">24</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="halign">start</property>
+            <property name="label" translatable="yes">Interval (in minutes)</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSpinButton" id="interval">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="width_chars">6</property>
+            <property name="max_width_chars">0</property>
+            <property name="input_purpose">digits</property>
+            <property name="adjustment">intervalAdjustement</property>
+            <property name="climb_rate">5</property>
+            <property name="numeric">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">1</property>
       </packing>
     </child>
   </object>
