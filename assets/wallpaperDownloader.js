@@ -6,32 +6,95 @@ const Json = imports.gi.Json;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const WALLPAPER_LOCATION = Me.dir.get_path() + '/wallpapers/'
 
-function create() {
-    return new WallpaperDownloader();
+let wallpaperDownloader = null;
+
+function instance() {
+    if (wallpaperDownloader == null) {
+        wallpaperDownloader = new WallpaperDownloader();
+    }
+    return wallpaperDownloader;
 }
 
 const WallpaperDownloader = new Lang.Class({
     Name: 'WallpaperDownloader',
 
+    _nextDesktopWallpaper: null,
+    _nextLockscreenWallpaper: null,
+    _wallpaperUrls: null,
+
     _init: function () {
     },
 
-    downloadWallpaper: function (callback) {
+    initialize: function (desktop, lockscreen) {
         let _this = this;
-        _this._fetchUrl(function (imageUrl) {
-            _this._fetchFile(imageUrl, function (uri) {
-                let wallpaper = new Gio.FileIcon({ file: Gio.File.new_for_uri(uri) });
-
-                callback(wallpaper);
-            });
+        this._fetchWallpaperUrls(function () {
+            _this._getNewWallpaper(false, desktop);
+            _this._getNewWallpaper(true, lockscreen);
         })
     },
 
-    _fetchUrl: function (callback) {
+    _getNewWallpaper: function(forLockscreen, callback) {
+        let _this = this;
+
+        this._fetchFile(this._wallpaperUrls.pop(), forLockscreen, function (wallpaper) {
+            if (forLockscreen) {
+                _this._nextLockscreenWallpaper = wallpaper;
+            } else {
+                _this._nextDesktopWallpaper = wallpaper;
+            }
+
+            if (callback) {
+                callback(wallpaper);
+            }
+        });
+    },
+
+    getWallpaper: function (forLockscreen, callback) {
+        let wallpaper = forLockscreen
+            ? this._nextLockscreenWallpaper
+            : this._nextDesktopWallpaper;
+
+        let _this = this;
+
+        if (this._wallpaperUrls.length == 0) {
+            this._fetchWallpaperUrls(function () {
+                _this._getNewWallpaper(forLockscreen, callback);
+            });
+        } else {
+            this._getNewWallpaper(forLockscreen, callback);
+        }
+
+        return wallpaper;
+    },
+
+    _shuffleWallpaperUrls: function () {
+        let j, x, i;
+        for (i = this._wallpaperUrls.length; i; i--) {
+            j = Math.floor(Math.random() * i);
+            x = this._wallpaperUrls[i - 1];
+            this._wallpaperUrls[i - 1] = this._wallpaperUrls[j];
+            this._wallpaperUrls[j] = x;
+        }
+    },
+
+    // downloadWallpaper: function (callback) {
+    //     let _this = this;
+    //     _this._fetchUrl(function (imageUrl) {
+    //         _this._fetchFile(imageUrl, function (uri) {
+    //             let wallpaper = new Gio.FileIcon({ file: Gio.File.new_for_uri(uri) });
+
+    //             callback(wallpaper);
+    //         });
+    //     })
+    // },
+
+    _fetchWallpaperUrls: function (callback) {
         let session = new Soup.SessionAsync();
         let message = Soup.Message.new('GET', 'https://reddit.com/r/wallpapers/top.json?top=month')
 
         let parser = new Json.Parser();
+
+        let _this = this;
 
         session.queue_message(message, function (session, message) {
             parser.load_from_data(message.response_body.data, -1);
@@ -39,27 +102,57 @@ const WallpaperDownloader = new Lang.Class({
             let data = parser.get_root().get_object().get_object_member('data');
             let children = data.get_array_member('children');
 
-            let imageLinks = [];
+            let imageUrls = [];
 
             children.foreach_element(function (array, index, element, data) {
                 let url = element.get_object().get_object_member('data').get_string_member('url');
                 if (String(url).indexOf('.jpg') > 0) { // TODO
-                    imageLinks.push(url);
+                    imageUrls.push(url);
                 }
             });
 
-            let randomImageUrl = imageLinks[Math.floor(Math.random() * imageLinks.length)];
-            print('Image = ' + randomImageUrl);
+            _this._wallpaperUrls = imageUrls;
+            _this._shuffleWallpaperUrls();
 
             if (callback) {
-                callback(randomImageUrl)
+                callback()
             }
         });
     },
 
-    _fetchFile: function (url, callback) {
+    // _fetchUrl: function (callback) {
+    //     let session = new Soup.SessionAsync();
+    //     let message = Soup.Message.new('GET', 'https://reddit.com/r/wallpapers/top.json?top=month')
+
+    //     let parser = new Json.Parser();
+
+    //     session.queue_message(message, function (session, message) {
+    //         parser.load_from_data(message.response_body.data, -1);
+
+    //         let data = parser.get_root().get_object().get_object_member('data');
+    //         let children = data.get_array_member('children');
+
+    //         let imageLinks = [];
+
+    //         children.foreach_element(function (array, index, element, data) {
+    //             let url = element.get_object().get_object_member('data').get_string_member('url');
+    //             if (String(url).indexOf('.jpg') > 0) { // TODO
+    //                 imageLinks.push(url);
+    //             }
+    //         });
+
+    //         let randomImageUrl = imageLinks[Math.floor(Math.random() * imageLinks.length)];
+
+    //         if (callback) {
+    //             callback(randomImageUrl)
+    //         }
+    //     });
+    // },
+
+    _fetchFile: function (url, forLockscreen, callback) {
         let date = new Date();
-        let name = date.getTime() + url.substr(url.lastIndexOf('.'));
+        let name = forLockscreen ? 'lockscreen-' : 'desktop-';
+        name = name + date.getTime() + url.substr(url.lastIndexOf('.'));
 
         let outputFile = Gio.file_new_for_path(WALLPAPER_LOCATION + String(name));
         let outputStream = outputFile.create(0, null);
@@ -71,7 +164,9 @@ const WallpaperDownloader = new Lang.Class({
             outputStream.write(contents, null);
 
             if (callback) {
-                callback(outputFile.get_uri());
+                let uri = outputFile.get_uri();
+                let file = new Gio.FileIcon({ file: Gio.File.new_for_uri(uri) });
+                callback(file);
             }
         });
     }

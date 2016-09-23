@@ -29,25 +29,22 @@ const WallerIndicator = new Lang.Class({
     _init: function () {
         this.parent(0, 'WallerIndicator');
 
+        this.wallpaperDownloader = WallpaperDownloader.instance();
+
         this._setupPanelIcon();
         this._setupMenu();
+
+        let _this = this;
+
+        this.wallpaperDownloader.initialize(function (wall) {
+            _this.wallpaperButton.setPreview(wall);
+        }, function (wall) {
+            _this.lockscreenWallpaperButton.setPreview(wall);
+        });
 
         this._settings = Utils.getSettings();
         this._settings.connect('changed', Lang.bind(this, this._applySettings));
         this._applySettings();
-
-        let _this = this;
-
-        this.wallpaperDownloader = WallpaperDownloader.create();
-        this.wallpaperDownloader.downloadWallpaper(function (wallpaper) {
-            WallpaperUtils.setWallpaper(wallpaper);
-            _this.wallpaperButton.setPreview(wallpaper);
-        })
-
-        this.wallpaperDownloader.downloadWallpaper(function (wallpaper) {
-            WallpaperUtils.setLockscreenWallpaper(wallpaper);
-            _this.lockscreenWallpaperButton.setPreview(wallpaper);
-        })
     },
 
     _setupPanelIcon: function () {
@@ -66,8 +63,8 @@ const WallerIndicator = new Lang.Class({
     },
 
     _setupMenu: function () {
-        this.wallpaperButton = new WallpaperButton.PopupWallpaperButton('Desktop Wallpaper', WallpaperUtils.getWallpaper());
-        this.lockscreenWallpaperButton = new WallpaperButton.PopupWallpaperButton('Lockscreen Wallpaper', WallpaperUtils.getLockscreenWallpaper());
+        this.wallpaperButton = new WallpaperButton.PopupWallpaperButton('Next Desktop Wallpaper', WallpaperUtils.getWallpaper());
+        this.lockscreenWallpaperButton = new WallpaperButton.PopupWallpaperButton('Next Lockscreen Wallpaper', WallpaperUtils.getLockscreenWallpaper());
 
         this.menu.addMenuItem(this.wallpaperButton);
         this.menu.addMenuItem(this.lockscreenWallpaperButton);

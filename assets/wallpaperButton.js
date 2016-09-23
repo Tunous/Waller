@@ -9,6 +9,7 @@ const Gtk = imports.gi.Gtk;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.assets.utils;
 const WallpaperUtils = Me.imports.assets.wallpaperUtils;
+const WallpaperDownloader = Me.imports.assets.wallpaperDownloader;
 
 const THUMBNAIL_WIDTH = 200;
 
@@ -57,6 +58,8 @@ const PopupWallpaperButton = new Lang.Class({
         this.menu.addMenuItem(setAsLockscreenWallpaperItem);
         this.menu.addMenuItem(viewWallpaperItem);
 
+        this.downloader = WallpaperDownloader.instance();
+
         setAsDesktopWallpaperItem.connect('activate', Lang.bind(this, this._setAsDesktopWallpaper));
         setAsLockscreenWallpaperItem.connect('activate', Lang.bind(this, this._setAsLockscreenWallpaper));
         viewWallpaperItem.connect('activate', Lang.bind(this, this._viewWallpaper));
@@ -67,11 +70,23 @@ const PopupWallpaperButton = new Lang.Class({
     },
 
     _setAsDesktopWallpaper: function() {
+        let _this = this;
+
+        this.downloader.getWallpaper(false, function (newWallpaper) {
+            _this.setPreview(newWallpaper);
+        });
+
         this._getTopMenu().close();
         WallpaperUtils.setWallpaper(this._thumbnail.get_gicon());
     },
 
     _setAsLockscreenWallpaper: function() {
+        let _this = this;
+
+        this.downloader.getWallpaper(true, function (newWallpaper) {
+            _this.setPreview(newWallpaper);
+        });
+
         this._getTopMenu().close();
         WallpaperUtils.setLockscreenWallpaper(this._thumbnail.get_gicon());
     },
