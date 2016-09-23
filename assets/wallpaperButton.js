@@ -29,15 +29,12 @@ const Thumbnail = new Lang.Class({
 
 const PopupWallpaperButton = new Lang.Class({
     Name: 'PopupWallpaperButton',
-    Extends: PopupMenu.PopupSubMenuMenuItem,
+    Extends: PopupMenu.PopupBaseMenuItem,
 
     _init: function(text, wallpaper) {
-        this.parent('', false);
+        this.parent();
 
         let box = new St.BoxLayout({ vertical: true });
-
-        this.actor.remove_all_children();
-        this.actor.add(this._ornamentLabel);
 
         box.add_child(new St.Label({
             text: text,
@@ -49,42 +46,14 @@ const PopupWallpaperButton = new Lang.Class({
         box.add_child(this._thumbnail);
 
         this.actor.add_actor(box);
-
-        let setAsDesktopWallpaperItem = new PopupMenu.PopupMenuItem('Set as Desktop wallpaper');
-        let setAsLockscreenWallpaperItem = new PopupMenu.PopupMenuItem('Set as Lockscreen wallpaper');
-        let viewWallpaperItem = new PopupMenu.PopupMenuItem('View');
-
-        this.menu.addMenuItem(setAsDesktopWallpaperItem);
-        this.menu.addMenuItem(setAsLockscreenWallpaperItem);
-        this.menu.addMenuItem(viewWallpaperItem);
-
-        this.downloader = WallpaperDownloader.instance();
-
-        setAsDesktopWallpaperItem.connect('activate', Lang.bind(this, this._setAsDesktopWallpaper));
-        setAsLockscreenWallpaperItem.connect('activate', Lang.bind(this, this._setAsLockscreenWallpaper));
-        viewWallpaperItem.connect('activate', Lang.bind(this, this._viewWallpaper));
     },
 
     setPreview: function(wallpaper) {
         this._thumbnail.set_gicon(wallpaper);
     },
 
-    _setAsDesktopWallpaper: function() {
-        let _this = this;
-
-        this.downloader.getWallpaper(false);
-
-        this._getTopMenu().close();
-        WallpaperUtils.setWallpaper(this._thumbnail.get_gicon());
-    },
-
-    _setAsLockscreenWallpaper: function() {
-        let _this = this;
-
-        this.downloader.getWallpaper(true);
-
-        this._getTopMenu().close();
-        WallpaperUtils.setLockscreenWallpaper(this._thumbnail.get_gicon());
+    getImage: function() {
+        return this._thumbnail.get_gicon();
     },
 
     _viewWallpaper: function() {

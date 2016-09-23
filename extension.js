@@ -64,6 +64,14 @@ const WallerIndicator = new Lang.Class({
         this.wallpaperButton = new WallpaperButton.PopupWallpaperButton('Next Desktop Wallpaper', WallpaperUtils.getWallpaper());
         this.lockscreenWallpaperButton = new WallpaperButton.PopupWallpaperButton('Next Lockscreen Wallpaper', WallpaperUtils.getLockscreenWallpaper());
 
+        this.wallpaperButton.connect('activate', Lang.bind(this, function() {
+            WallpaperUtils.setWallpaper(this.wallpaperDownloader.getWallpaper(false));
+        }));
+
+        this.lockscreenWallpaperButton.connect('activate', Lang.bind(this, function() {
+            WallpaperUtils.setLockscreenWallpaper(this.wallpaperDownloader.getWallpaper(true));
+        }));
+
         this.menu.addMenuItem(this.wallpaperButton);
         this.menu.addMenuItem(this.lockscreenWallpaperButton);
 
