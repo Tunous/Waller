@@ -17,8 +17,9 @@ const WallpaperDownloader = new Lang.Class({
     },
 
     downloadWallpaper: function (callback) {
-        this._fetchUrl(function (imageUrl) {
-            this._fetchFile(imageUrl, function (uri) {
+        let _this = this;
+        _this._fetchUrl(function (imageUrl) {
+            _this._fetchFile(imageUrl, function (uri) {
                 let wallpaper = new Gio.FileIcon({ file: Gio.File.new_for_uri(uri) });
 
                 callback(wallpaper);
@@ -37,11 +38,21 @@ const WallpaperDownloader = new Lang.Class({
 
             let data = parser.get_root().get_object().get_object_member('data');
             let children = data.get_array_member('children');
-            let childrenData = children.get_object_element(0).get_object_member('data');
-            let imageUrl = childrenData.get_string_member('url');
+
+            let imageLinks = [];
+
+            children.foreach_element(function (array, index, element, data) {
+                let url = element.get_object().get_object_member('data').get_string_member('url');
+                if (String(url).indexOf('.jpg') > 0) { // TODO
+                    imageLinks.push(url);
+                }
+            });
+
+            let randomImageUrl = imageLinks[Math.floor(Math.random() * imageLinks.length)];
+            print('Image = ' + randomImageUrl);
 
             if (callback) {
-                callback(imageUrl)
+                callback(randomImageUrl)
             }
         });
     },
@@ -60,7 +71,7 @@ const WallpaperDownloader = new Lang.Class({
             outputStream.write(contents, null);
 
             if (callback) {
-                callback(name, outputFile.get_uri());
+                callback(outputFile.get_uri());
             }
         });
     }

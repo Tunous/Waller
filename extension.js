@@ -36,15 +36,17 @@ const WallerIndicator = new Lang.Class({
         this._settings.connect('changed', Lang.bind(this, this._applySettings));
         this._applySettings();
 
+        let _this = this;
+
         this.wallpaperDownloader = WallpaperDownloader.create();
         this.wallpaperDownloader.downloadWallpaper(function (wallpaper) {
             WallpaperUtils.setWallpaper(wallpaper);
-            this.wallpaperButton.setPreview(wallpaper);
+            _this.wallpaperButton.setPreview(wallpaper);
         })
 
         this.wallpaperDownloader.downloadWallpaper(function (wallpaper) {
             WallpaperUtils.setLockscreenWallpaper(wallpaper);
-            this.lockscreenWallpaperButton.setPreview(wallpaper);
+            _this.lockscreenWallpaperButton.setPreview(wallpaper);
         })
     },
 
