@@ -72,9 +72,7 @@ const PopupWallpaperButton = new Lang.Class({
     _setAsDesktopWallpaper: function() {
         let _this = this;
 
-        this.downloader.getWallpaper(false, function (newWallpaper) {
-            _this.setPreview(newWallpaper);
-        });
+        this.downloader.getWallpaper(false);
 
         this._getTopMenu().close();
         WallpaperUtils.setWallpaper(this._thumbnail.get_gicon());
@@ -83,9 +81,7 @@ const PopupWallpaperButton = new Lang.Class({
     _setAsLockscreenWallpaper: function() {
         let _this = this;
 
-        this.downloader.getWallpaper(true, function (newWallpaper) {
-            _this.setPreview(newWallpaper);
-        });
+        this.downloader.getWallpaper(true);
 
         this._getTopMenu().close();
         WallpaperUtils.setLockscreenWallpaper(this._thumbnail.get_gicon());

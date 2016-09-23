@@ -4,6 +4,8 @@ const Soup = imports.gi.Soup;
 const Json = imports.gi.Json;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
+const Timer = Me.imports.assets.timer;
+const WallpaperUtils = Me.imports.assets.wallpaperUtils;
 const WALLPAPER_LOCATION = Me.dir.get_path() + '/wallpapers/'
 
 let wallpaperDownloader = null;
@@ -20,48 +22,73 @@ const WallpaperDownloader = new Lang.Class({
 
     _nextDesktopWallpaper: null,
     _nextLockscreenWallpaper: null,
-    _wallpaperUrls: null,
+    _wallpaperUrls: [],
+
+    _desktopWallpaperCallback: null,
+    _lockscreenWallpaperCallback: null,
 
     _init: function () {
+        this.timer = new Timer.Timer();
+        this.timer.setCallback(Lang.bind(this, this._onTick));
+        this.timer.start();
+
+        this._fetchWallpaperUrls(Lang.bind(this, function() {
+            this._getNewWallpaper(false);
+            this._getNewWallpaper(true);
+        }));
     },
 
-    initialize: function (desktop, lockscreen) {
-        let _this = this;
-        this._fetchWallpaperUrls(function () {
-            _this._getNewWallpaper(false, desktop);
-            _this._getNewWallpaper(true, lockscreen);
-        })
+    _onTick: function() {
+        WallpaperUtils.setWallpaper(this.getWallpaper(false));
+        WallpaperUtils.setLockscreenWallpaper(this.getWallpaper(true));
+        return true;
     },
 
-    _getNewWallpaper: function(forLockscreen, callback) {
-        let _this = this;
+    setDesktopWallpaperCallback: function(callback) {
+        if (callback === undefined || callback === null || typeof callback !== 'function') {
+            throw TypeError('"callback" needs to be a function.');
+        }
 
-        this._fetchFile(this._wallpaperUrls.pop(), forLockscreen, function (wallpaper) {
+        this._desktopWallpaperCallback = callback;
+    },
+
+    setLockscreenWallpaperCallback: function(callback) {
+        if (callback === undefined || callback === null || typeof callback !== 'function') {
+            throw TypeError('"callback" needs to be a function.');
+        }
+
+        this._lockscreenWallpaperCallback = callback;
+    },
+
+    _getNewWallpaper: function(forLockscreen) {
+        this._fetchFile(this._wallpaperUrls.pop(), forLockscreen, Lang.bind(this, function (wallpaper) {
             if (forLockscreen) {
-                _this._nextLockscreenWallpaper = wallpaper;
-            } else {
-                _this._nextDesktopWallpaper = wallpaper;
-            }
+                this._nextLockscreenWallpaper = wallpaper;
 
-            if (callback) {
-                callback(wallpaper);
+                if (this._lockscreenWallpaperCallback !== null) {
+                    this._lockscreenWallpaperCallback(wallpaper);
+                }
+            } else {
+                this._nextDesktopWallpaper = wallpaper;
+
+                if (this._desktopWallpaperCallback !== null) {
+                    this._desktopWallpaperCallback(wallpaper);
+                }
             }
-        });
+        }));
     },
 
-    getWallpaper: function (forLockscreen, callback) {
+    getWallpaper: function (forLockscreen) {
         let wallpaper = forLockscreen
             ? this._nextLockscreenWallpaper
             : this._nextDesktopWallpaper;
 
-        let _this = this;
-
         if (this._wallpaperUrls.length == 0) {
-            this._fetchWallpaperUrls(function () {
-                _this._getNewWallpaper(forLockscreen, callback);
-            });
+            this._fetchWallpaperUrls(Lang.bind(this, function () {
+                this._getNewWallpaper(forLockscreen);
+            }));
         } else {
-            this._getNewWallpaper(forLockscreen, callback);
+            this._getNewWallpaper(forLockscreen);
         }
 
         return wallpaper;
@@ -76,17 +103,6 @@ const WallpaperDownloader = new Lang.Class({
             this._wallpaperUrls[j] = x;
         }
     },
-
-    // downloadWallpaper: function (callback) {
-    //     let _this = this;
-    //     _this._fetchUrl(function (imageUrl) {
-    //         _this._fetchFile(imageUrl, function (uri) {
-    //             let wallpaper = new Gio.FileIcon({ file: Gio.File.new_for_uri(uri) });
-
-    //             callback(wallpaper);
-    //         });
-    //     })
-    // },
 
     _fetchWallpaperUrls: function (callback) {
         let session = new Soup.SessionAsync();
@@ -120,35 +136,6 @@ const WallpaperDownloader = new Lang.Class({
         });
     },
 
-    // _fetchUrl: function (callback) {
-    //     let session = new Soup.SessionAsync();
-    //     let message = Soup.Message.new('GET', 'https://reddit.com/r/wallpapers/top.json?top=month')
-
-    //     let parser = new Json.Parser();
-
-    //     session.queue_message(message, function (session, message) {
-    //         parser.load_from_data(message.response_body.data, -1);
-
-    //         let data = parser.get_root().get_object().get_object_member('data');
-    //         let children = data.get_array_member('children');
-
-    //         let imageLinks = [];
-
-    //         children.foreach_element(function (array, index, element, data) {
-    //             let url = element.get_object().get_object_member('data').get_string_member('url');
-    //             if (String(url).indexOf('.jpg') > 0) { // TODO
-    //                 imageLinks.push(url);
-    //             }
-    //         });
-
-    //         let randomImageUrl = imageLinks[Math.floor(Math.random() * imageLinks.length)];
-
-    //         if (callback) {
-    //             callback(randomImageUrl)
-    //         }
-    //     });
-    // },
-
     _fetchFile: function (url, forLockscreen, callback) {
         let date = new Date();
         let name = forLockscreen ? 'lockscreen-' : 'desktop-';
@@ -169,5 +156,11 @@ const WallpaperDownloader = new Lang.Class({
                 callback(file);
             }
         });
+    },
+
+    destory: function() {
+        this.parent();
+
+        this.timer.stop();
     }
 });

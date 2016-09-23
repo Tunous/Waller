@@ -30,17 +30,15 @@ const WallerIndicator = new Lang.Class({
         this.parent(0, 'WallerIndicator');
 
         this.wallpaperDownloader = WallpaperDownloader.instance();
+        this.wallpaperDownloader.setDesktopWallpaperCallback(Lang.bind(this, function (wallpaper) {
+            this.wallpaperButton.setPreview(wallpaper);
+        }));
+        this.wallpaperDownloader.setLockscreenWallpaperCallback(Lang.bind(this, function (wallpaper) {
+            this.lockscreenWallpaperButton.setPreview(wallpaper);
+        }));
 
         this._setupPanelIcon();
         this._setupMenu();
-
-        let _this = this;
-
-        this.wallpaperDownloader.initialize(function (wall) {
-            _this.wallpaperButton.setPreview(wall);
-        }, function (wall) {
-            _this.lockscreenWallpaperButton.setPreview(wall);
-        });
 
         this._settings = Utils.getSettings();
         this._settings.connect('changed', Lang.bind(this, this._applySettings));
@@ -96,6 +94,12 @@ const WallerIndicator = new Lang.Class({
     _openWallpapersFolder: function () {
         Utils.launchForUri(GLib.filename_to_uri(wallpaperLocation, ''));
     },
+
+    destory: function() {
+        this.parent();
+
+        this.wallpaperDownloader.destory();
+    }
 });
 
 function enable() {
