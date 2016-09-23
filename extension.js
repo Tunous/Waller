@@ -11,6 +11,7 @@ const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.assets.utils;
 const WallpaperButton = Me.imports.assets.wallpaperButton;
 const WallpaperUtils = Me.imports.assets.wallpaperUtils;
+const WallpaperDownloader = Me.imports.assets.wallpaperDownloader;
 
 const wallpaperLocation = Me.dir.get_path() + '/wallpapers/'
 
@@ -25,18 +26,29 @@ const WallerIndicator = new Lang.Class({
     Name: 'WallerIndicator',
     Extends: PanelMenu.Button,
 
-    _init: function() {
+    _init: function () {
         this.parent(0, 'WallerIndicator');
 
         this._setupPanelIcon();
         this._setupMenu();
 
         this._settings = Utils.getSettings();
-        this._settingsChangedId = this._settings.connect('changed', Lang.bind(this, this._applySettings));
+        this._settings.connect('changed', Lang.bind(this, this._applySettings));
         this._applySettings();
+
+        this.wallpaperDownloader = WallpaperDownloader.create();
+        this.wallpaperDownloader.downloadWallpaper(function (wallpaper) {
+            WallpaperUtils.setWallpaper(wallpaper);
+            this.wallpaperButton.setPreview(wallpaper);
+        })
+
+        this.wallpaperDownloader.downloadWallpaper(function (wallpaper) {
+            WallpaperUtils.setLockscreenWallpaper(wallpaper);
+            this.lockscreenWallpaperButton.setPreview(wallpaper);
+        })
     },
 
-    _setupPanelIcon: function() {
+    _setupPanelIcon: function () {
         let box = new St.BoxLayout({
             vertical: false,
             style_class: 'panel-status-menu-box'
@@ -51,19 +63,12 @@ const WallerIndicator = new Lang.Class({
         this.actor.add_child(box);
     },
 
-    _setupMenu: function() {
-        let currentWallpaper = WallpaperUtils.getWallpaper();
+    _setupMenu: function () {
+        this.wallpaperButton = new WallpaperButton.PopupWallpaperButton('Desktop Wallpaper', WallpaperUtils.getWallpaper());
+        this.lockscreenWallpaperButton = new WallpaperButton.PopupWallpaperButton('Lockscreen Wallpaper', WallpaperUtils.getLockscreenWallpaper());
 
-        let wallpaperButton = new WallpaperButton.PopupWallpaperButton('Next Desktop Wallpaper', currentWallpaper);
-
-        WallpaperUtils.saveNewWallpaper(function(name, uri) {
-            let nextWallpaper = new Gio.FileIcon({ file: Gio.File.new_for_uri(uri) });
-
-            wallpaperButton.setPreview(nextWallpaper);
-        })
-
-        this.menu.addMenuItem(wallpaperButton);
-        this.menu.addMenuItem(new WallpaperButton.PopupWallpaperButton('Next Lockscreen Wallpaper', currentWallpaper));
+        this.menu.addMenuItem(this.wallpaperButton);
+        this.menu.addMenuItem(this.lockscreenWallpaperButton);
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
@@ -76,20 +81,20 @@ const WallerIndicator = new Lang.Class({
         settingsMenuItem.connect('activate', Lang.bind(this, this._openSettings));
     },
 
-    _openSettings: function() {
+    _openSettings: function () {
         Util.spawn(["gnome-shell-extension-prefs", Me.uuid]);
     },
 
-    _applySettings: function() {
+    _applySettings: function () {
         SHOW_PANEL_ICON = this._settings.get_boolean('show-panel-icon');
         this._updatePanelIconVisibility();
     },
 
-    _updatePanelIconVisibility: function() {
+    _updatePanelIconVisibility: function () {
         this.actor.visible = SHOW_PANEL_ICON;
     },
 
-    _openWallpapersFolder: function() {
+    _openWallpapersFolder: function () {
         Utils.launchForUri(GLib.filename_to_uri(wallpaperLocation, ''));
     },
 });
