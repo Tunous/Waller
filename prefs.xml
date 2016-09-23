@@ -1,38 +1,51 @@
-<interface domain="waller">
-
-<object class="GtkScrolledWindow" id="scrolled_window_built">
-    <property name="hscrollbar-policy">never</property>
-    <property name="vscrollbar-policy">automatic</property>
-    <property name="expand">true</property>
-
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.20.0 -->
+<interface>
+  <requires lib="gtk+" version="3.20"/>
+  <object class="GtkGrid" id="window">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="margin_left">24</property>
+    <property name="margin_right">24</property>
+    <property name="margin_top">24</property>
+    <property name="margin_bottom">24</property>
+    <property name="row_spacing">6</property>
     <child>
-        <object class="GtkGrid">
-            <property name="margin">10</property>
-            <property name="row-spacing">5</property>
-            <property name="row-homogeneous">false</property>
-            <property name="orientation">vertical</property>
-
-            <child>
-                <object class="GtkBox">
-                    <property name="spacing">5</property>
-
-                    <child>
-                        <object class="GtkLabel">
-                            <property name="label" translatable="yes">Show panel icon</property>
-                            <property name="hexpand">true</property>
-                            <property name="halign">1</property>
-                        </object>
-                    </child>
-
-                    <child>
-                        <object class="GtkSwitch" id="field_show_panel_icon">
-                            <property name="active">true</property>
-                        </object>
-                    </child>
-                </object>
-            </child>
-        </object>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="hexpand">True</property>
+        <property name="spacing">24</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="halign">start</property>
+            <property name="label" translatable="yes">Show panel icon</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkSwitch" id="showPanelIconSwitch">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="active">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">0</property>
+      </packing>
     </child>
-</object>
-
+  </object>
 </interface>
