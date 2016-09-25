@@ -3,7 +3,6 @@
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <object class="GtkAdjustment" id="intervalAdjustement">
-    <property name="lower">1</property>
     <property name="upper">3000</property>
     <property name="value">60</property>
     <property name="step_increment">1</property>
@@ -34,6 +33,7 @@
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">Whether icon in top panel should be displayed</property>
         <property name="margin_bottom">6</property>
         <property name="hexpand">True</property>
         <property name="spacing">24</property>
@@ -72,6 +72,7 @@
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">How often set new wallpaper. Setting this to 0 disables automatic changing.</property>
         <property name="margin_bottom">6</property>
         <property name="hexpand">True</property>
         <property name="spacing">24</property>
@@ -115,6 +116,7 @@
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">Whether the lockscreen wallpaper should be changed too</property>
         <property name="margin_bottom">6</property>
         <property name="hexpand">True</property>
         <property name="spacing">24</property>
@@ -255,6 +257,7 @@
       <object class="GtkBox">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">Whether the wallpaper should be changed on system startup</property>
         <property name="margin_bottom">6</property>
         <property name="hexpand">True</property>
         <property name="spacing">24</property>
