@@ -25,5 +25,13 @@
                 If true, update lockscreen together with desktop wallpaper
             </description>
         </key>
+
+        <key name="update-on-launch" type="b">
+            <default>true</default>
+            <summary>Update wallpaper on launch</summary>
+            <description>
+                If true, update wallpaper immediately on startup
+            </description>
+        </key>
     </schema>
 </schemalist>

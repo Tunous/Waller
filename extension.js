@@ -17,7 +17,8 @@ const wallpaperLocation = Me.dir.get_path() + '/wallpapers/'
 
 let SHOW_PANEL_ICON = true;
 let DOWNLOAD_INTERVAL = 60;
-let UPDATE_LOCKSCREEN_WALLPAPER = false;
+let UPDATE_LOCKSCREEN_WALLPAPER = true;
+let UPDATE_WALLPAPER_ON_LAUNCH = true;
 
 let wallerIndicator;
 
@@ -28,12 +29,20 @@ const WallerIndicator = new Lang.Class({
     Name: 'WallerIndicator',
     Extends: PanelMenu.Button,
 
+    _hasInitializedWallpaper: false,
+
     _init: function () {
         this.parent(0, 'WallerIndicator');
 
         this.wallpaperDownloader = WallpaperDownloader.create(Lang.bind(this, this._updateWallpaper));
         this.wallpaperDownloader.setCallback(Lang.bind(this, function (wallpaper) {
             this.wallpaperButton.setPreview(wallpaper);
+
+            if (!this._hasInitializedWallpaper && UPDATE_WALLPAPER_ON_LAUNCH) {
+                this._updateWallpaper();
+            }
+
+            this._hasInitializedWallpaper = true;
         }));
 
         this._setupPanelIcon();
@@ -95,6 +104,7 @@ const WallerIndicator = new Lang.Class({
         SHOW_PANEL_ICON = this._settings.get_boolean('show-panel-icon');
         DOWNLOAD_INTERVAL = this._settings.get_int('interval');
         UPDATE_LOCKSCREEN_WALLPAPER = this._settings.get_boolean('update-lockscreen-wallpaper');
+        UPDATE_WALLPAPER_ON_LAUNCH = this._settings.get_boolean('update-on-launch');
 
         this.actor.visible = SHOW_PANEL_ICON;
         this.wallpaperDownloader.timer.setInterval(DOWNLOAD_INTERVAL);
