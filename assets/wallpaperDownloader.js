@@ -22,17 +22,18 @@ const WallpaperDownloader = new Lang.Class({
 
     _nextDesktopWallpaper: null,
     _nextLockscreenWallpaper: null,
-    _wallpaperUrls: [],
 
     _desktopWallpaperCallback: null,
     _lockscreenWallpaperCallback: null,
+
+    _queue: [],
 
     _init: function () {
         this.timer = new Timer.Timer();
         this.timer.setCallback(Lang.bind(this, this._onTick));
         this.timer.start();
 
-        this._fetchWallpaperUrls(Lang.bind(this, function() {
+        this._fillQueue(Lang.bind(this, function() {
             this._getNewWallpaper(false);
             this._getNewWallpaper(true);
         }));
@@ -61,7 +62,7 @@ const WallpaperDownloader = new Lang.Class({
     },
 
     _getNewWallpaper: function(forLockscreen) {
-        this._fetchFile(this._wallpaperUrls.pop(), forLockscreen, Lang.bind(this, function (wallpaper) {
+        this._fetchFile(this._queue.pop(), forLockscreen, Lang.bind(this, function (wallpaper) {
             if (forLockscreen) {
                 this._nextLockscreenWallpaper = wallpaper;
 
@@ -83,8 +84,8 @@ const WallpaperDownloader = new Lang.Class({
             ? this._nextLockscreenWallpaper
             : this._nextDesktopWallpaper;
 
-        if (this._wallpaperUrls.length == 0) {
-            this._fetchWallpaperUrls(Lang.bind(this, function () {
+        if (this._queue.length == 0) {
+            this._fillQueue(Lang.bind(this, function () {
                 this._getNewWallpaper(forLockscreen);
             }));
         } else {
@@ -94,46 +95,53 @@ const WallpaperDownloader = new Lang.Class({
         return wallpaper;
     },
 
-    _shuffleWallpaperUrls: function () {
+    _shuffle: function (array) {
         let j, x, i;
-        for (i = this._wallpaperUrls.length; i; i--) {
+        for (i = array.length; i; i--) {
             j = Math.floor(Math.random() * i);
-            x = this._wallpaperUrls[i - 1];
-            this._wallpaperUrls[i - 1] = this._wallpaperUrls[j];
-            this._wallpaperUrls[j] = x;
+            x = array[i - 1];
+            array[i - 1] = array[j];
+            array[j] = x;
         }
     },
 
-    _fetchWallpaperUrls: function (callback) {
+    _fillQueue: function (callback) {
         let session = new Soup.SessionAsync();
-        let message = Soup.Message.new('GET', 'https://reddit.com/r/wallpapers/top.json?top=month')
+        let message = Soup.Message.new('GET', 'https://reddit.com/r/wallpapers/top.json?limit=100')
 
         let parser = new Json.Parser();
 
-        let _this = this;
-
-        session.queue_message(message, function (session, message) {
+        session.queue_message(message, Lang.bind(this, function (session, message) {
             parser.load_from_data(message.response_body.data, -1);
 
-            let data = parser.get_root().get_object().get_object_member('data');
-            let children = data.get_array_member('children');
+            let rootData = parser.get_root().get_object().get_object_member('data');
+            let children = rootData.get_array_member('children');
 
             let imageUrls = [];
 
-            children.foreach_element(function (array, index, element, data) {
-                let url = element.get_object().get_object_member('data').get_string_member('url');
-                if (String(url).indexOf('.jpg') > 0) { // TODO
-                    imageUrls.push(url);
-                }
-            });
+            children.foreach_element(Lang.bind(this, function (array, index, element, d) {
+                let data = element.get_object().get_object_member('data');
+                let imageUrl = data.get_string_member('url');
 
-            _this._wallpaperUrls = imageUrls;
-            _this._shuffleWallpaperUrls();
+                if (/^http(s)?:\/\/imgur\.com\/\w+$/.test(imageUrl)) {
+                    imageUrl = imageUrl.replace('://', '://i.') + '.jpg';
+                }
+
+                let lowerImageUrl = imageUrl.toLowerCase();
+
+                if (lowerImageUrl.endsWith('.jpg') ||
+                    lowerImageUrl.endsWith('.jpeg') ||
+                    lowerImageUrl.endsWith('.png')) {
+                    this._queue.push(imageUrl);
+                }
+            }));
+
+            this._shuffle(this._queue);
 
             if (callback) {
-                callback()
+                callback();
             }
-        });
+        }));
     },
 
     _fetchFile: function (url, forLockscreen, callback) {
