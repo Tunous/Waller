@@ -46,10 +46,6 @@ const PopupWallpaperButton = new Lang.Class({
         this._thumbnail.set_gicon(wallpaper);
     },
 
-    getImage: function() {
-        return this._thumbnail.get_gicon();
-    },
-
     _viewWallpaper: function() {
         let uri = this._thumbnail.get_gicon().get_file().get_uri();
         Utils.launchForUri(uri);
@@ -59,6 +55,7 @@ const PopupWallpaperButton = new Lang.Class({
 const WallpaperDownloader = new Lang.Class({
     Name: 'WallpaperDownloader',
 
+    _currentWallpaper: null,
     _nextWallpaper: null,
     _callback: null,
     _queue: [],
@@ -83,6 +80,7 @@ const WallpaperDownloader = new Lang.Class({
 
     getWallpaper: function () {
         let wallpaper = this._nextWallpaper;
+        this._currentWallpaper = wallpaper;
         
         if (this._queue.length == 0) {
             this._fillQueue(Lang.bind(this, function () {
@@ -93,6 +91,34 @@ const WallpaperDownloader = new Lang.Class({
         }
 
         return wallpaper;
+    },
+
+    deleteHistory: function () {
+        let nextWallpaperName = this._nextWallpaper != null ? this._nextWallpaper.get_file().get_basename() : null;
+        let currentWallpaperName = this._currentWallpaper != null ? this._currentWallpaper.get_file().get_basename() : null;
+
+        let directory = Gio.file_new_for_path(WALLPAPER_LOCATION);
+        let enumerator = directory.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
+
+        let fileInfo;
+        let deleteFile;
+
+        do {
+            fileInfo = enumerator.next_file(null);
+
+            if (!fileInfo) {
+                break;
+            }
+
+            let name = fileInfo.get_name();
+
+            if (name[0] != '.' && name != nextWallpaperName && name != currentWallpaperName) {
+                deleteFile = Gio.file_new_for_path(WALLPAPER_LOCATION + name);
+                deleteFile.delete(null);
+            }
+        } while (fileInfo);
+
+        enumerator.close(null);
     },
 
     destory: function () {

@@ -66,18 +66,6 @@ const WallerIndicator = new Lang.Class({
         this.actor.add_child(box);
     },
 
-    _updateWallpaper: function() {
-        let wallpaper = this.wallpaperDownloader.getWallpaper();
-
-        Wall.setWallpaper(wallpaper);
-
-        if (UPDATE_LOCKSCREEN_WALLPAPER) {
-            Wall.setLockscreenWallpaper(wallpaper);
-        }
-
-        return true;
-    },
-
     _setupMenu: function () {
         this.wallpaperButton = new Wall.PopupWallpaperButton('Next Wallpaper', Wall.getWallpaper());
         this.wallpaperButton.connect('activate', Lang.bind(this, this._updateWallpaper));
@@ -86,12 +74,16 @@ const WallerIndicator = new Lang.Class({
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         let openWallpaperFolderMenuItem = new PopupMenu.PopupMenuItem('Open Wallpaper Folder');
-        this.menu.addMenuItem(openWallpaperFolderMenuItem);
         openWallpaperFolderMenuItem.connect('activate', Lang.bind(this, this._openWallpapersFolder));
+        this.menu.addMenuItem(openWallpaperFolderMenuItem);
+
+        let deleteHistoryMenuItem = new PopupMenu.PopupMenuItem('Delete History');
+        deleteHistoryMenuItem.connect('activate', Lang.bind(this.wallpaperDownloader, this.wallpaperDownloader.deleteHistory));
+        this.menu.addMenuItem(deleteHistoryMenuItem);
 
         let settingsMenuItem = new PopupMenu.PopupMenuItem('Settings');
-        this.menu.addMenuItem(settingsMenuItem);
         settingsMenuItem.connect('activate', Lang.bind(this, this._openSettings));
+        this.menu.addMenuItem(settingsMenuItem);
     },
 
     _openSettings: function () {
@@ -110,6 +102,18 @@ const WallerIndicator = new Lang.Class({
 
     _openWallpapersFolder: function () {
         Utils.launchForUri(GLib.filename_to_uri(wallpaperLocation, ''));
+    },
+
+    _updateWallpaper: function() {
+        let wallpaper = this.wallpaperDownloader.getWallpaper();
+
+        Wall.setWallpaper(wallpaper);
+
+        if (UPDATE_LOCKSCREEN_WALLPAPER) {
+            Wall.setLockscreenWallpaper(wallpaper);
+        }
+
+        return true;
     },
 
     destory: function() {
