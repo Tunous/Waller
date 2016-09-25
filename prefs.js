@@ -16,6 +16,7 @@ function buildPrefsWidget() {
 
     settings.bind('show-panel-icon', buildable.get_object('showPanelIcon'), 'active', Gio.SettingsBindFlags.DEFAULT);
     settings.bind('interval', buildable.get_object('interval'), 'value', Gio.SettingsBindFlags.DEFAULT);
+    settings.bind('update-lockscreen-wallpaper', buildable.get_object('updateLockscreenWallpaper'), 'active', Gio.SettingsBindFlags.DEFAULT);
 
     box.show_all();
     return box;

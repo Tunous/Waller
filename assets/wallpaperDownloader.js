@@ -8,13 +8,8 @@ const Timer = Me.imports.assets.timer;
 const WallpaperUtils = Me.imports.assets.wallpaperUtils;
 const WALLPAPER_LOCATION = Me.dir.get_path() + '/wallpapers/'
 
-let wallpaperDownloader = null;
-
-function instance() {
-    if (wallpaperDownloader == null) {
-        wallpaperDownloader = new WallpaperDownloader();
-    }
-    return wallpaperDownloader;
+function create(tickCallback) {
+    return new WallpaperDownloader(tickCallback);
 }
 
 const WallpaperDownloader = new Lang.Class({
@@ -24,9 +19,9 @@ const WallpaperDownloader = new Lang.Class({
     _callback: null,
     _queue: [],
 
-    _init: function () {
+    _init: function (tickCallback) {
         this.timer = new Timer.Timer();
-        this.timer.setCallback(Lang.bind(this, this._onTick));
+        this.timer.setCallback(tickCallback);
         this.timer.start();
 
         this._fillQueue(Lang.bind(this, function () {
@@ -35,14 +30,6 @@ const WallpaperDownloader = new Lang.Class({
     },
 
     setCallback: function (callback) {
-        if (callback === undefined || callback === null || typeof callback !== 'function') {
-            throw TypeError('"callback" needs to be a function.');
-        }
-
-        this._callback = callback;
-    },
-
-    setLockscreenWallpaperCallback: function (callback) {
         if (callback === undefined || callback === null || typeof callback !== 'function') {
             throw TypeError('"callback" needs to be a function.');
         }
@@ -68,13 +55,6 @@ const WallpaperDownloader = new Lang.Class({
         this.parent();
 
         this.timer.stop();
-    },
-
-    _onTick: function () {
-        let wallpaper = this.getWallpaper();
-        WallpaperUtils.setWallpaper(wallpaper);
-        WallpaperUtils.setLockscreenWallpaper(wallpaper);
-        return true;
     },
 
     _getNewWallpaper: function () {

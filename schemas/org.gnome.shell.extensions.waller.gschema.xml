@@ -17,5 +17,13 @@
                 The interval of wallpaper updates
             </description>
         </key>
+
+        <key name="update-lockscreen-wallpaper" type="b">
+            <default>true</default>
+            <summary>Update lockscreen wallpaper</summary>
+            <description>
+                If true, update lockscreen together with desktop wallpaper
+            </description>
+        </key>
     </schema>
 </schemalist>

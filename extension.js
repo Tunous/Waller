@@ -17,6 +17,7 @@ const wallpaperLocation = Me.dir.get_path() + '/wallpapers/'
 
 let SHOW_PANEL_ICON = true;
 let DOWNLOAD_INTERVAL = 60;
+let UPDATE_LOCKSCREEN_WALLPAPER = false;
 
 let wallerIndicator;
 
@@ -30,7 +31,7 @@ const WallerIndicator = new Lang.Class({
     _init: function () {
         this.parent(0, 'WallerIndicator');
 
-        this.wallpaperDownloader = WallpaperDownloader.instance();
+        this.wallpaperDownloader = WallpaperDownloader.create(Lang.bind(this, this._updateWallpaper));
         this.wallpaperDownloader.setCallback(Lang.bind(this, function (wallpaper) {
             this.wallpaperButton.setPreview(wallpaper);
         }));
@@ -58,15 +59,21 @@ const WallerIndicator = new Lang.Class({
         this.actor.add_child(box);
     },
 
+    _updateWallpaper: function() {
+        let wallpaper = this.wallpaperDownloader.getWallpaper();
+
+        WallpaperUtils.setWallpaper(wallpaper);
+
+        if (UPDATE_LOCKSCREEN_WALLPAPER) {
+            WallpaperUtils.setLockscreenWallpaper(wallpaper);
+        }
+
+        return true;
+    },
+
     _setupMenu: function () {
         this.wallpaperButton = new WallpaperButton.PopupWallpaperButton('Next Wallpaper', WallpaperUtils.getWallpaper());
-
-        this.wallpaperButton.connect('activate', Lang.bind(this, function() {
-            let wallpaper = this.wallpaperDownloader.getWallpaper();
-            WallpaperUtils.setWallpaper(wallpaper);
-            WallpaperUtils.setLockscreenWallpaper(wallpaper);
-        }));
-
+        this.wallpaperButton.connect('activate', Lang.bind(this, this._updateWallpaper));
         this.menu.addMenuItem(this.wallpaperButton);
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
@@ -87,6 +94,7 @@ const WallerIndicator = new Lang.Class({
     _applySettings: function () {
         SHOW_PANEL_ICON = this._settings.get_boolean('show-panel-icon');
         DOWNLOAD_INTERVAL = this._settings.get_int('interval');
+        UPDATE_LOCKSCREEN_WALLPAPER = this._settings.get_boolean('update-lockscreen-wallpaper');
 
         this.actor.visible = SHOW_PANEL_ICON;
         this.wallpaperDownloader.timer.setInterval(DOWNLOAD_INTERVAL);
