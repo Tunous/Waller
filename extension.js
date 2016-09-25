@@ -31,11 +31,8 @@ const WallerIndicator = new Lang.Class({
         this.parent(0, 'WallerIndicator');
 
         this.wallpaperDownloader = WallpaperDownloader.instance();
-        this.wallpaperDownloader.setDesktopWallpaperCallback(Lang.bind(this, function (wallpaper) {
+        this.wallpaperDownloader.setCallback(Lang.bind(this, function (wallpaper) {
             this.wallpaperButton.setPreview(wallpaper);
-        }));
-        this.wallpaperDownloader.setLockscreenWallpaperCallback(Lang.bind(this, function (wallpaper) {
-            this.lockscreenWallpaperButton.setPreview(wallpaper);
         }));
 
         this._setupPanelIcon();
@@ -62,19 +59,15 @@ const WallerIndicator = new Lang.Class({
     },
 
     _setupMenu: function () {
-        this.wallpaperButton = new WallpaperButton.PopupWallpaperButton('Next Desktop Wallpaper', WallpaperUtils.getWallpaper());
-        this.lockscreenWallpaperButton = new WallpaperButton.PopupWallpaperButton('Next Lockscreen Wallpaper', WallpaperUtils.getLockscreenWallpaper());
+        this.wallpaperButton = new WallpaperButton.PopupWallpaperButton('Next Wallpaper', WallpaperUtils.getWallpaper());
 
         this.wallpaperButton.connect('activate', Lang.bind(this, function() {
-            WallpaperUtils.setWallpaper(this.wallpaperDownloader.getWallpaper(false));
-        }));
-
-        this.lockscreenWallpaperButton.connect('activate', Lang.bind(this, function() {
-            WallpaperUtils.setLockscreenWallpaper(this.wallpaperDownloader.getWallpaper(true));
+            let wallpaper = this.wallpaperDownloader.getWallpaper();
+            WallpaperUtils.setWallpaper(wallpaper);
+            WallpaperUtils.setLockscreenWallpaper(wallpaper);
         }));
 
         this.menu.addMenuItem(this.wallpaperButton);
-        this.menu.addMenuItem(this.lockscreenWallpaperButton);
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 

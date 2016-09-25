@@ -20,12 +20,8 @@ function instance() {
 const WallpaperDownloader = new Lang.Class({
     Name: 'WallpaperDownloader',
 
-    _nextDesktopWallpaper: null,
-    _nextLockscreenWallpaper: null,
-
-    _desktopWallpaperCallback: null,
-    _lockscreenWallpaperCallback: null,
-
+    _nextWallpaper: null,
+    _callback: null,
     _queue: [],
 
     _init: function () {
@@ -33,66 +29,62 @@ const WallpaperDownloader = new Lang.Class({
         this.timer.setCallback(Lang.bind(this, this._onTick));
         this.timer.start();
 
-        this._fillQueue(Lang.bind(this, function() {
-            this._getNewWallpaper(false);
-            this._getNewWallpaper(true);
+        this._fillQueue(Lang.bind(this, function () {
+            this._getNewWallpaper();
         }));
     },
 
-    _onTick: function() {
-        WallpaperUtils.setWallpaper(this.getWallpaper(false));
-        WallpaperUtils.setLockscreenWallpaper(this.getWallpaper(true));
-        return true;
-    },
-
-    setDesktopWallpaperCallback: function(callback) {
+    setCallback: function (callback) {
         if (callback === undefined || callback === null || typeof callback !== 'function') {
             throw TypeError('"callback" needs to be a function.');
         }
 
-        this._desktopWallpaperCallback = callback;
+        this._callback = callback;
     },
 
-    setLockscreenWallpaperCallback: function(callback) {
+    setLockscreenWallpaperCallback: function (callback) {
         if (callback === undefined || callback === null || typeof callback !== 'function') {
             throw TypeError('"callback" needs to be a function.');
         }
 
-        this._lockscreenWallpaperCallback = callback;
+        this._callback = callback;
     },
 
-    _getNewWallpaper: function(forLockscreen) {
-        this._fetchFile(this._queue.pop(), forLockscreen, Lang.bind(this, function (wallpaper) {
-            if (forLockscreen) {
-                this._nextLockscreenWallpaper = wallpaper;
-
-                if (this._lockscreenWallpaperCallback !== null) {
-                    this._lockscreenWallpaperCallback(wallpaper);
-                }
-            } else {
-                this._nextDesktopWallpaper = wallpaper;
-
-                if (this._desktopWallpaperCallback !== null) {
-                    this._desktopWallpaperCallback(wallpaper);
-                }
-            }
-        }));
-    },
-
-    getWallpaper: function (forLockscreen) {
-        let wallpaper = forLockscreen
-            ? this._nextLockscreenWallpaper
-            : this._nextDesktopWallpaper;
-
+    getWallpaper: function () {
+        let wallpaper = this._nextWallpaper;
+        
         if (this._queue.length == 0) {
             this._fillQueue(Lang.bind(this, function () {
-                this._getNewWallpaper(forLockscreen);
+                this._getNewWallpaper();
             }));
         } else {
-            this._getNewWallpaper(forLockscreen);
+            this._getNewWallpaper();
         }
 
         return wallpaper;
+    },
+
+    destory: function () {
+        this.parent();
+
+        this.timer.stop();
+    },
+
+    _onTick: function () {
+        let wallpaper = this.getWallpaper();
+        WallpaperUtils.setWallpaper(wallpaper);
+        WallpaperUtils.setLockscreenWallpaper(wallpaper);
+        return true;
+    },
+
+    _getNewWallpaper: function () {
+        this._fetchFile(this._queue.pop(), Lang.bind(this, function (wallpaper) {
+            this._nextWallpaper = wallpaper;
+
+            if (this._callback !== null) {
+                this._callback(wallpaper);
+            }
+        }));
     },
 
     _shuffle: function (array) {
@@ -144,10 +136,9 @@ const WallpaperDownloader = new Lang.Class({
         }));
     },
 
-    _fetchFile: function (url, forLockscreen, callback) {
+    _fetchFile: function (url, callback) {
         let date = new Date();
-        let name = forLockscreen ? 'lockscreen-' : 'desktop-';
-        name = name + date.getTime() + url.substr(url.lastIndexOf('.'));
+        let name = date.getTime() + url.substr(url.lastIndexOf('.'));
 
         let outputFile = Gio.file_new_for_path(WALLPAPER_LOCATION + String(name));
         let outputStream = outputFile.create(0, null);
@@ -164,11 +155,5 @@ const WallpaperDownloader = new Lang.Class({
                 callback(file);
             }
         });
-    },
-
-    destory: function() {
-        this.parent();
-
-        this.timer.stop();
     }
 });
