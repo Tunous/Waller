@@ -9,9 +9,7 @@ const Util = imports.misc.util;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.assets.utils;
-const WallpaperButton = Me.imports.assets.wallpaperButton;
-const WallpaperUtils = Me.imports.assets.wallpaperUtils;
-const WallpaperDownloader = Me.imports.assets.wallpaperDownloader;
+const Wall = Me.imports.assets.wall;
 
 const wallpaperLocation = Me.dir.get_path() + '/wallpapers/'
 
@@ -34,7 +32,7 @@ const WallerIndicator = new Lang.Class({
     _init: function () {
         this.parent(0, 'WallerIndicator');
 
-        this.wallpaperDownloader = WallpaperDownloader.create(Lang.bind(this, this._updateWallpaper));
+        this.wallpaperDownloader = new Wall.WallpaperDownloader(Lang.bind(this, this._updateWallpaper));
         this.wallpaperDownloader.setCallback(Lang.bind(this, function (wallpaper) {
             this.wallpaperButton.setPreview(wallpaper);
 
@@ -71,17 +69,17 @@ const WallerIndicator = new Lang.Class({
     _updateWallpaper: function() {
         let wallpaper = this.wallpaperDownloader.getWallpaper();
 
-        WallpaperUtils.setWallpaper(wallpaper);
+        Wall.setWallpaper(wallpaper);
 
         if (UPDATE_LOCKSCREEN_WALLPAPER) {
-            WallpaperUtils.setLockscreenWallpaper(wallpaper);
+            Wall.setLockscreenWallpaper(wallpaper);
         }
 
         return true;
     },
 
     _setupMenu: function () {
-        this.wallpaperButton = new WallpaperButton.PopupWallpaperButton('Next Wallpaper', WallpaperUtils.getWallpaper());
+        this.wallpaperButton = new Wall.PopupWallpaperButton('Next Wallpaper', Wall.getWallpaper());
         this.wallpaperButton.connect('activate', Lang.bind(this, this._updateWallpaper));
         this.menu.addMenuItem(this.wallpaperButton);
 

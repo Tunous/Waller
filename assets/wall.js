@@ -1,16 +1,60 @@
+
 const Lang = imports.lang;
+const St = imports.gi.St;
+const PopupMenu = imports.ui.popupMenu;
+const Gdk = imports.gi.Gdk;
 const Gio = imports.gi.Gio;
 const Soup = imports.gi.Soup;
 const Json = imports.gi.Json;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
+const Utils = Me.imports.assets.utils;
 const Timer = Me.imports.assets.timer;
-const WallpaperUtils = Me.imports.assets.wallpaperUtils;
-const WALLPAPER_LOCATION = Me.dir.get_path() + '/wallpapers/'
 
-function create(tickCallback) {
-    return new WallpaperDownloader(tickCallback);
-}
+const WALLPAPER_LOCATION = Me.dir.get_path() + '/wallpapers/'
+const THUMBNAIL_WIDTH = 200;
+const SETTING_WALLPAPER_URI = 'picture-uri';
+const SETTING_BACKGROUND_MODE = 'picture-options';
+
+const PopupWallpaperButton = new Lang.Class({
+    Name: 'PopupWallpaperButton',
+    Extends: PopupMenu.PopupBaseMenuItem,
+
+    _init: function(text, wallpaper) {
+        this.parent();
+
+        let box = new St.BoxLayout({ vertical: true });
+
+        box.add_child(new St.Label({
+            text: text,
+            style_class: 'label-thumb'
+        }));
+
+        this._thumbnail = new St.Icon({
+            gicon: wallpaper,
+            icon_size: THUMBNAIL_WIDTH,
+            style_class: 'wall-thumbnail',
+            height: THUMBNAIL_WIDTH * getScreenAspectRatio()
+        });
+
+        box.add_child(this._thumbnail);
+
+        this.actor.add_actor(box);
+    },
+
+    setPreview: function(wallpaper) {
+        this._thumbnail.set_gicon(wallpaper);
+    },
+
+    getImage: function() {
+        return this._thumbnail.get_gicon();
+    },
+
+    _viewWallpaper: function() {
+        let uri = this._thumbnail.get_gicon().get_file().get_uri();
+        Utils.launchForUri(uri);
+    }
+});
 
 const WallpaperDownloader = new Lang.Class({
     Name: 'WallpaperDownloader',
@@ -89,8 +133,6 @@ const WallpaperDownloader = new Lang.Class({
             let rootData = parser.get_root().get_object().get_object_member('data');
             let children = rootData.get_array_member('children');
 
-            let imageUrls = [];
-
             children.foreach_element(Lang.bind(this, function (array, index, element, d) {
                 let data = element.get_object().get_object_member('data');
                 let imageUrl = data.get_string_member('url');
@@ -137,3 +179,58 @@ const WallpaperDownloader = new Lang.Class({
         });
     }
 });
+
+function setWallpaperByUri(uri) {
+    _setWallpaperByUri(_getWallpaperSetting(), uri);
+}
+
+function setWallpaper(wallpaper) {
+    _setWallpaper(_getWallpaperSetting(), wallpaper);
+}
+
+function setLockscreenWallpaper(wallpaper) {
+    _setWallpaper(_getLockscreenWallpaperSetting(), wallpaper);
+}
+
+function getWallpaper() {
+    return _getWallpaperFromSetting(_getWallpaperSetting());
+}
+
+function getLockscreenWallpaper() {
+    return _getWallpaperFromSetting(_getWallpaperSetting());
+}
+
+function getScreenAspectRatio() {
+    let setting = _getWallpaperSetting();
+    let backgroundMode = setting.get_string(SETTING_BACKGROUND_MODE);
+
+    if (backgroundMode == 'spanned') {
+        return Gdk.Screen.height() / Gdk.Screen.width();
+    }
+
+    let screen = Gdk.Screen.get_default();
+    let monitor = screen.get_monitor_geometry(screen.get_primary_monitor());
+    return monitor.height / monitor.width;
+}
+
+function _getWallpaperSetting() {
+    return new Gio.Settings({ schema: 'org.gnome.desktop.background' });
+}
+
+function _getLockscreenWallpaperSetting() {
+    return new Gio.Settings({ schema: 'org.gnome.desktop.screensaver' });
+}
+
+function _getWallpaperFromSetting(setting) {
+    let uri = setting.get_string(SETTING_WALLPAPER_URI);
+    return new Gio.FileIcon({ file: Gio.File.new_for_uri(uri) });
+}
+
+function _setWallpaper(setting, wallpaper) {
+    let uri = wallpaper.get_file().get_uri();
+    _setWallpaperByUri(setting, uri);
+}
+
+function _setWallpaperByUri(setting, uri) {
+    setting.set_string(SETTING_WALLPAPER_URI, uri);
+}
