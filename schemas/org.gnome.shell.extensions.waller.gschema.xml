@@ -11,6 +11,7 @@
         </key>
 
         <key name="interval" type="i">
+            <range min="0" max="3000"/>
             <default>60</default>
             <summary>Interval (in seconds)</summary>
             <description>
@@ -31,6 +32,14 @@
             <summary>Update wallpaper on launch</summary>
             <description>
                 If true, update wallpaper immediately on startup
+            </description>
+        </key>
+
+        <key name="subreddits" type="as">
+            <default>['wallpapers']</default>
+            <summary>Source subreddits</summary>
+            <description>
+                List of subreddits from which to download wallpapers
             </description>
         </key>
     </schema>

@@ -63,7 +63,9 @@ const WallpaperDownloader = new Lang.Class({
     _init: function (tickCallback) {
         this.timer = new Timer.Timer();
         this.timer.setCallback(tickCallback);
+    },
 
+    init: function() {
         this._fillQueue(Lang.bind(this, function () {
             this._getNewWallpaper();
         }));

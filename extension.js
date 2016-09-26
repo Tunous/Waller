@@ -49,6 +49,8 @@ const WallerIndicator = new Lang.Class({
         this._settings = Utils.getSettings();
         this._settings.connect('changed', Lang.bind(this, this._applySettings));
         this._applySettings();
+
+        this.wallpaperDownloader.init();
     },
 
     _setupPanelIcon: function () {
