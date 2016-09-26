@@ -17,6 +17,7 @@ let SHOW_PANEL_ICON = true;
 let DOWNLOAD_INTERVAL = 60;
 let UPDATE_LOCKSCREEN_WALLPAPER = true;
 let UPDATE_WALLPAPER_ON_LAUNCH = true;
+let SUBREDDITS = ['wallpapers'];
 
 let wallerIndicator;
 
@@ -70,7 +71,9 @@ const WallerIndicator = new Lang.Class({
 
     _setupMenu: function () {
         this.wallpaperButton = new Wall.PopupWallpaperButton('Next Wallpaper', Wall.getWallpaper());
-        this.wallpaperButton.connect('activate', Lang.bind(this, this._updateWallpaper));
+        this.wallpaperButton.connect('activate', Lang.bind(this, function () {
+            this._updateWallpaper();
+        }));
         this.menu.addMenuItem(this.wallpaperButton);
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
@@ -97,6 +100,7 @@ const WallerIndicator = new Lang.Class({
         DOWNLOAD_INTERVAL = this._settings.get_int('interval');
         UPDATE_LOCKSCREEN_WALLPAPER = this._settings.get_boolean('update-lockscreen-wallpaper');
         UPDATE_WALLPAPER_ON_LAUNCH = this._settings.get_boolean('update-on-launch');
+        SUBREDDITS = this._settings.get_strv('subreddits');
 
         this.actor.visible = SHOW_PANEL_ICON;
         this.wallpaperDownloader.timer.setInterval(DOWNLOAD_INTERVAL);

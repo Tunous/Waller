@@ -59,6 +59,7 @@ const WallpaperDownloader = new Lang.Class({
     _nextWallpaper: null,
     _callback: null,
     _queue: [],
+    _subreddits: ['wallpapers'],
 
     _init: function (tickCallback) {
         this.timer = new Timer.Timer();
@@ -77,6 +78,10 @@ const WallpaperDownloader = new Lang.Class({
         }
 
         this._callback = callback;
+    },
+
+    setSubreddits: function (subreddits) {
+        this._subreddits = subreddits;
     },
 
     getWallpaper: function () {
@@ -149,8 +154,11 @@ const WallpaperDownloader = new Lang.Class({
     },
 
     _fillQueue: function (callback) {
+        let subreddit = this._subreddits[Math.floor(Math.random() * this._subreddits.length)];
+        let downloadLink = 'https://reddit.com/r/' + subreddit + '/top.json?limit=100';
+
         let session = new Soup.SessionAsync();
-        let message = Soup.Message.new('GET', 'https://reddit.com/r/wallpapers/top.json?limit=100')
+        let message = Soup.Message.new('GET', downloadLink)
 
         let parser = new Json.Parser();
 
