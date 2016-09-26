@@ -104,6 +104,7 @@ const WallerIndicator = new Lang.Class({
 
         this.actor.visible = SHOW_PANEL_ICON;
         this.wallpaperDownloader.timer.setInterval(DOWNLOAD_INTERVAL);
+        this.wallpaperDownloader.setSubreddits(SUBREDDITS);
     },
 
     _openWallpapersFolder: function () {
