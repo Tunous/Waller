@@ -1,4 +1,3 @@
-
 const Lang = imports.lang;
 const St = imports.gi.St;
 const PopupMenu = imports.ui.popupMenu;
@@ -20,7 +19,7 @@ const PopupWallpaperButton = new Lang.Class({
     Name: 'PopupWallpaperButton',
     Extends: PopupMenu.PopupBaseMenuItem,
 
-    _init: function(text, wallpaper) {
+    _init: function (text, wallpaper) {
         this.parent();
 
         let box = new St.BoxLayout({ vertical: true });
@@ -42,11 +41,11 @@ const PopupWallpaperButton = new Lang.Class({
         this.actor.add_actor(box);
     },
 
-    setPreview: function(wallpaper) {
+    setPreview: function (wallpaper) {
         this._thumbnail.set_gicon(wallpaper);
     },
 
-    _viewWallpaper: function() {
+    _viewWallpaper: function () {
         let uri = this._thumbnail.get_gicon().get_file().get_uri();
         Utils.launchForUri(uri);
     }
@@ -66,7 +65,7 @@ const WallpaperDownloader = new Lang.Class({
         this.timer.setCallback(tickCallback);
     },
 
-    init: function() {
+    init: function () {
         this._fillQueue(Lang.bind(this, function () {
             this._getNewWallpaper();
         }));
@@ -87,7 +86,7 @@ const WallpaperDownloader = new Lang.Class({
     getWallpaper: function () {
         let wallpaper = this._nextWallpaper;
         this._currentWallpaper = wallpaper;
-        
+
         if (this._queue.length == 0) {
             this._fillQueue(Lang.bind(this, function () {
                 this._getNewWallpaper();

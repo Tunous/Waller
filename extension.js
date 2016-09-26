@@ -110,7 +110,7 @@ const WallerIndicator = new Lang.Class({
         Utils.launchForUri(GLib.filename_to_uri(wallpaperLocation, ''));
     },
 
-    _updateWallpaper: function() {
+    _updateWallpaper: function () {
         let wallpaper = this.wallpaperDownloader.getWallpaper();
 
         Wall.setWallpaper(wallpaper);
@@ -122,7 +122,7 @@ const WallerIndicator = new Lang.Class({
         return true;
     },
 
-    destory: function() {
+    destory: function () {
         this.parent();
 
         this.wallpaperDownloader.destory();
