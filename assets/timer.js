@@ -18,12 +18,7 @@ const Timer = new Lang.Class({
 
     setInterval: function (interval) {
         this._interval = interval * 60;
-
-        if (interval == 0) {
-            this.stop();
-        } else {
-            this.start();
-        }
+        this.stop();
     },
 
     start: function () {
