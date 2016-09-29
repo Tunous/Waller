@@ -59,10 +59,30 @@ const WallpaperDownloader = new Lang.Class({
     _callback: null,
     _queue: [],
     _subreddits: ['wallpapers'],
+    _settings: null,
 
     _init: function (tickCallback) {
         this.timer = new Timer.Timer();
         this.timer.setCallback(tickCallback);
+
+        this._settings = Utils.getSettings();
+
+        this._updateInterval(true);
+        this._updateSubreddits();
+
+        this._settings.connect('changed::interval', Lang.bind(this, this._updateInterval));
+        this._settings.connect('changed::subreddits', Lang.bind(this, this._updateSubreddits));
+    },
+
+    _updateSubreddits: function () {
+        this._subreddits = this._settings.get_strv('subreddits');
+        print('Waller: Updated subreddits');
+    },
+
+    _updateInterval: function (init) {
+        this.timer.setInterval(this._settings.get_int('interval'));
+        this.timer.start();
+        print('Waller: Updated interval');
     },
 
     init: function () {
@@ -86,6 +106,8 @@ const WallpaperDownloader = new Lang.Class({
     getWallpaper: function () {
         let wallpaper = this._nextWallpaper;
         this._currentWallpaper = wallpaper;
+
+        print("Waller: Getting wallpaper");
 
         if (this._queue.length == 0) {
             this._fillQueue(Lang.bind(this, function () {
@@ -133,10 +155,13 @@ const WallpaperDownloader = new Lang.Class({
     },
 
     _getNewWallpaper: function () {
+        print("Waller: Getting new wallpaper");
+
         this._fetchFile(this._queue.pop(), Lang.bind(this, function (wallpaper) {
             this._nextWallpaper = wallpaper;
 
             if (this._callback !== null) {
+                print("Waller: Callback about new wallpaper");
                 this._callback(wallpaper);
             }
         }));

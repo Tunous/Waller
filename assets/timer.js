@@ -17,6 +17,7 @@ const Timer = new Lang.Class({
     },
 
     setInterval: function (interval) {
+        print("Waller: Setting interval in timer");
         this._interval = interval * 60;
         this.stop();
     },
@@ -27,6 +28,8 @@ const Timer = new Lang.Class({
         if (this._interval == 0) {
             return;
         }
+
+        print("Waller: Starting timer");
 
         this._timerId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, this._interval, this._callback);
     },

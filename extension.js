@@ -13,11 +13,8 @@ const Wall = Me.imports.assets.wall;
 
 const wallpaperLocation = Me.path + '/wallpapers/'
 
-let SHOW_PANEL_ICON = true;
-let DOWNLOAD_INTERVAL = 60;
 let UPDATE_LOCKSCREEN_WALLPAPER = true;
 let UPDATE_WALLPAPER_ON_LAUNCH = true;
-let SUBREDDITS = ['wallpapers'];
 
 let wallerIndicator;
 
@@ -48,10 +45,31 @@ const WallerIndicator = new Lang.Class({
         this._setupMenu();
 
         this._settings = Utils.getSettings();
-        this._settings.connect('changed', Lang.bind(this, this._applySettings));
-        this._applySettings();
+
+        this._updatePanelIconVisibility();
+        this._updateLockscreenWallpaperSetting();
+        this._updateWallpaperOnLaunchSetting();
+
+        this._settings.connect('changed::show-panel-icon', Lang.bind(this, this._updatePanelIconVisibility));
+        this._settings.connect('changed::update-lockscreen-wallpaper', Lang.bind(this, this._updateLockscreenWallpaperSetting));
+        this._settings.connect('changed::update-on-launch', Lang.bind(this, this._updateWallpaperOnLaunchSetting));
 
         this.wallpaperDownloader.init();
+    },
+
+    _updatePanelIconVisibility: function () {
+        this.actor.visible = this._settings.get_boolean('show-panel-icon');
+        print('Waller: Updated icon visibility');
+    },
+
+    _updateLockscreenWallpaperSetting: function () {
+        UPDATE_LOCKSCREEN_WALLPAPER = this._settings.get_boolean('update-lockscreen-wallpaper');
+        print('Waller: Updated lockscreen wallpaper setting');
+    },
+
+    _updateWallpaperOnLaunchSetting: function () {
+        UPDATE_WALLPAPER_ON_LAUNCH = this._settings.get_boolean('update-on-launch');
+        print('Waller: Updated on launch setting');
     },
 
     _setupPanelIcon: function () {
@@ -93,20 +111,6 @@ const WallerIndicator = new Lang.Class({
 
     _openSettings: function () {
         Util.spawn(["gnome-shell-extension-prefs", Me.uuid]);
-    },
-
-    _applySettings: function () {
-        SHOW_PANEL_ICON = this._settings.get_boolean('show-panel-icon');
-        DOWNLOAD_INTERVAL = this._settings.get_int('interval');
-        UPDATE_LOCKSCREEN_WALLPAPER = this._settings.get_boolean('update-lockscreen-wallpaper');
-        UPDATE_WALLPAPER_ON_LAUNCH = this._settings.get_boolean('update-on-launch');
-        SUBREDDITS = this._settings.get_strv('subreddits');
-
-        this.actor.visible = SHOW_PANEL_ICON;
-        this.wallpaperDownloader.timer.setInterval(DOWNLOAD_INTERVAL);
-        this.wallpaperDownloader.setSubreddits(SUBREDDITS);
-
-        this.wallpaperDownloader.timer.start();
     },
 
     _openWallpapersFolder: function () {
