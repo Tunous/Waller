@@ -10,7 +10,7 @@ const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.assets.utils;
 const Timer = Me.imports.assets.timer;
 
-const WALLPAPER_LOCATION = Me.dir.get_path() + '/wallpapers/'
+const WALLPAPER_LOCATION = Me.path + '/wallpapers/'
 const THUMBNAIL_WIDTH = 200;
 const SETTING_WALLPAPER_URI = 'picture-uri';
 const SETTING_BACKGROUND_MODE = 'picture-options';

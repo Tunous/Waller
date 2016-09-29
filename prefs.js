@@ -15,7 +15,7 @@ function init() {
 
 function buildPrefsWidget() {
     let buildable = new Gtk.Builder();
-    buildable.add_from_file(Me.dir.get_path() + '/prefs.xml');
+    buildable.add_from_file(Me.path + '/Settings.ui');
     let box = buildable.get_object('window');
 
     settings.bind('show-panel-icon', buildable.get_object('showPanelIcon'), 'active', Gio.SettingsBindFlags.DEFAULT);

@@ -11,7 +11,7 @@ const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.assets.utils;
 const Wall = Me.imports.assets.wall;
 
-const wallpaperLocation = Me.dir.get_path() + '/wallpapers/'
+const wallpaperLocation = Me.path + '/wallpapers/'
 
 let SHOW_PANEL_ICON = true;
 let DOWNLOAD_INTERVAL = 60;
