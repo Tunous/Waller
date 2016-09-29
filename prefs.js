@@ -1,82 +1,124 @@
+const Lang = imports.lang;
 const Gtk = imports.gi.Gtk;
 const Gio = imports.gi.Gio;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.assets.utils;
 
 let SUBREDDITS_COL = 0;
-let ready = false;
-let settings;
-let subredditInput;
-let subredditStore;
 
-function init() {
-    settings = Utils.getSettings();
-}
+const Settings = new Lang.Class({
+    Name: 'Waller.Settings',
 
-function buildPrefsWidget() {
-    let buildable = new Gtk.Builder();
-    buildable.add_from_file(Me.path + '/Settings.ui');
-    let box = buildable.get_object('window');
+    _ready: false,
 
-    settings.bind('show-panel-icon', buildable.get_object('showPanelIcon'), 'active', Gio.SettingsBindFlags.DEFAULT);
-    settings.bind('interval', buildable.get_object('interval'), 'value', Gio.SettingsBindFlags.DEFAULT);
-    settings.bind('update-lockscreen-wallpaper', buildable.get_object('updateLockscreenWallpaper'), 'active', Gio.SettingsBindFlags.DEFAULT);
-    settings.bind('update-on-launch', buildable.get_object('updateOnLaunch'), 'active', Gio.SettingsBindFlags.DEFAULT);
+    _init: function () {
+        this._settings = Utils.getSettings();
 
-    // Initialize data
-    subredditStore = buildable.get_object('subredditStore');
-    let loadedSubreddits = settings.get_strv('subreddits');
-    let addIterator;
+        this._builder = new Gtk.Builder();
+        this._builder.add_from_file(Me.path + '/Settings.ui');
 
-    for (let i = 0; i < loadedSubreddits.length; i++) {
-        addIterator = subredditStore.append();
-        subredditStore.set_value(addIterator, SUBREDDITS_COL, loadedSubreddits[i])
-    }
+        this.widget = this._builder.get_object('window');
 
-    // Add subreddit button behavior
-    subredditInput = buildable.get_object('addSubredditInput');
-    let addSubredditButton = buildable.get_object('addSubredditButton');
+        this._subredditStore = this._builder.get_object('subredditStore');
+        this._subredditInput = this._builder.get_object('subredditInput');
+        this._selection = this._builder.get_object('subredditSelection');
 
-    subredditInput.connect('activate', addSubreddit);
-    addSubredditButton.connect('clicked', addSubreddit);
+        this._bindSettings();
 
-    // Remove selected item button behavior
-    let removeSubredditButton = buildable.get_object('removeSubredditButton');
-    let selection = buildable.get_object('subredditSelection');
+        this._builder.connect_signals_full(Lang.bind(this, this._connector));
+    },
 
-    removeSubredditButton.connect('clicked', function () {
-        let [isSuccess, model, iter] = selection.get_selected();
+    _connector: function (builder, object, signal, handler) {
+        object.connect(signal, Lang.bind(this, this._SignalHandler[handler]));
+    },
+
+    _bindSettings: function () {
+        let loadedSubreddits = this._settings.get_strv('subreddits');
+        let addIterator;
+
+        for (let i = 0; i < loadedSubreddits.length; i++) {
+            addIterator = this._subredditStore.append();
+            this._subredditStore.set_value(addIterator, SUBREDDITS_COL, loadedSubreddits[i])
+        }
+
+        this._settings.bind('show-panel-icon',
+            this._builder.get_object('showPanelIcon'),
+            'active',
+            Gio.SettingsBindFlags.DEFAULT);
+
+        this._settings.bind('interval',
+            this._builder.get_object('interval'),
+            'value',
+            Gio.SettingsBindFlags.DEFAULT);
+
+        this._settings.bind('update-lockscreen-wallpaper',
+            this._builder.get_object('updateLockscreenWallpaper'),
+            'active',
+            Gio.SettingsBindFlags.DEFAULT);
+
+        this._settings.bind('update-on-launch',
+            this._builder.get_object('updateOnLaunch'),
+            'active',
+            Gio.SettingsBindFlags.DEFAULT);
+    },
+
+    _addSubredditFromInput: function () {
+        let iterator = this._subredditStore.append();
+        this._subredditStore.set_value(iterator, SUBREDDITS_COL, this._subredditInput.get_text());
+        this._subredditInput.delete_text(0, -1);
+    },
+
+    _removeSelectedSubreddit: function () {
+        let [isSuccess, model, iter] = this._selection.get_selected();
         if (isSuccess) {
             model.remove(iter);
         }
-    });
+    },
 
-    // Save setting
-    box.connect('screen_changed', function (widget) {
-        if (!ready) {
-            ready = true;
+    _saveSubreddits: function () {
+        if (!this._ready) {
+            this._ready = true;
             return;
         }
 
-        let [success, iterator] = subredditStore.get_iter_first();
+        let [success, iterator] = this._subredditStore.get_iter_first();
         let subreddits = [];
 
         if (success) {
             do {
-                let subreddit = subredditStore.get_value(iterator, SUBREDDITS_COL);
+                let subreddit = this._subredditStore.get_value(iterator, SUBREDDITS_COL);
                 subreddits.push(subreddit);
-            } while (subredditStore.iter_next(iterator));
+            } while (this._subredditStore.iter_next(iterator));
         }
 
-        settings.set_strv('subreddits', subreddits);
-    });
+        this._settings.set_strv('subreddits', subreddits);
+    },
 
-    box.show_all();
-    return box;
+    _SignalHandler: {
+        addSubredditButton_clicked_cb: function (button) {
+            this._addSubredditFromInput();
+        },
+
+        removeSubredditButton_clicked_cb: function (button) {
+            this._removeSelectedSubreddit();
+        },
+
+        subredditInput_activate_cb: function (input) {
+            this._addSubredditFromInput();
+        },
+
+        window_screen_changed_cb: function (window) {
+            this._saveSubreddits();
+        }
+    }
+});
+
+function init() {
 }
 
-function addSubreddit() {
-    let iterator = subredditStore.append();
-    subredditStore.set_value(iterator, SUBREDDITS_COL, subredditInput.get_text());
-    subredditInput.delete_text(0, -1);
+function buildPrefsWidget() {
+    let settings = new Settings();
+    let widget = settings.widget;
+    widget.show_all();
+    return widget;
 }

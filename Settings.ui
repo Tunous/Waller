@@ -21,6 +21,7 @@
     <property name="margin_right">24</property>
     <property name="margin_top">24</property>
     <property name="margin_bottom">24</property>
+    <signal name="screen-changed" handler="window_screen_changed_cb" swapped="no"/>
     <child>
       <object class="GtkBox">
         <property name="visible">True</property>
@@ -196,9 +197,10 @@
             <property name="can_focus">False</property>
             <property name="margin_right">12</property>
             <child>
-              <object class="GtkEntry" id="addSubredditInput">
+              <object class="GtkEntry" id="subredditInput">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <signal name="activate" handler="subredditInput_activate_cb" swapped="no"/>
               </object>
             </child>
           </object>
@@ -215,6 +217,7 @@
             <property name="label" translatable="yes">Add</property>
             <property name="use_underline">True</property>
             <property name="icon_name">list-add-symbolic</property>
+            <signal name="clicked" handler="addSubredditButton_clicked_cb" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -228,6 +231,7 @@
             <property name="label" translatable="yes">Remove</property>
             <property name="use_underline">True</property>
             <property name="icon_name">edit-delete-symbolic</property>
+            <signal name="clicked" handler="removeSubredditButton_clicked_cb" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
