@@ -8,8 +8,8 @@ const PopupMenu = imports.ui.popupMenu;
 const Util = imports.misc.util;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Utils = Me.imports.assets.utils;
-const Wall = Me.imports.assets.wall;
+const Utils = Me.imports.utils;
+const Wall = Me.imports.wall;
 
 const wallpaperLocation = Me.path + '/wallpapers/'
 

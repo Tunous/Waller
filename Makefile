@@ -1,8 +1,17 @@
 UUID = waller@thanel.me
-BASE_MODULES = extension.js stylesheet.css metadata.json prefs.js Settings.ui LICENSE README.md
-EXTRA_MODULES = assets/timer.js assets/utils.js assets/wall.js
-INSTALL_BASE = ~/.local/share/gnome-shell/extensions
-INSTALL_NAME = waller@thanel.me
+INSTALL_PATH = ~/.local/share/gnome-shell/extensions
+INSTALL_NAME = $(UUID)
+
+SRC = extension.js \
+	stylesheet.css \
+	metadata.json \
+	prefs.js \
+	Settings.ui \
+	LICENSE \
+	README.md \
+	timer.js \
+	utils.js \
+	wall.js
 
 all: extension
 
@@ -16,22 +25,21 @@ extension: ./schemas/gschemas.compiled
 
 install: install-local
 
-install-local: _build
-	rm -rf $(INSTALL_BASE)/$(INSTALL_NAME)
-	mkdir -p $(INSTALL_BASE)/$(INSTALL_NAME)
-	cp -r ./_build/* $(INSTALL_BASE)/$(INSTALL_NAME)/
-	rm -rf _build
+install-local: build
+	rm -rf $(INSTALL_PATH)/$(INSTALL_NAME)
+	mkdir -p $(INSTALL_PATH)/$(INSTALL_NAME)
+	cp -r ./build/* $(INSTALL_PATH)/$(INSTALL_NAME)/
+	rm -rf build
 	echo done
 
-_build: all
-	rm -rf ./_build
-	mkdir -p _build/assets
-	cp $(BASE_MODULES) _build
-	cp $(EXTRA_MODULES) _build/assets
-	mkdir -p _build/schemas
-	cp schemas/*.xml _build/schemas
-	cp schemas/gschemas.compiled _build/schemas
-	mkdir -p _build/wallpapers
+build: all
+	rm -rf ./build
+	mkdir -p build
+	cp $(SRC) build
+	mkdir -p build/schemas
+	cp schemas/*.xml build/schemas
+	cp schemas/gschemas.compiled build/schemas
+	mkdir -p build/wallpapers
 
 uninstall:
-	rm -rf $(INSTALL_BASE)/$(INSTALL_NAME)
+	rm -rf $(INSTALL_PATH)/$(INSTALL_NAME)

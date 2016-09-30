@@ -7,8 +7,8 @@ const Soup = imports.gi.Soup;
 const Json = imports.gi.Json;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Utils = Me.imports.assets.utils;
-const Timer = Me.imports.assets.timer;
+const Utils = Me.imports.utils;
+const Timer = Me.imports.timer;
 
 const WALLPAPER_LOCATION = Me.path + '/wallpapers/'
 const THUMBNAIL_WIDTH = 200;
