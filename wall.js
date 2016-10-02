@@ -5,6 +5,7 @@ const Gdk = imports.gi.Gdk;
 const Gio = imports.gi.Gio;
 const Soup = imports.gi.Soup;
 const Json = imports.gi.Json;
+const GLib = imports.gi.GLib;
 
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Utils = Me.imports.utils;
@@ -67,11 +68,16 @@ const WallpaperDownloader = new Lang.Class({
 
         this._settings = Utils.getSettings();
 
-        this._updateInterval(true);
+        this._updateInterval();
         this._updateSubreddits();
 
         this._settings.connect('changed::interval', Lang.bind(this, this._updateInterval));
         this._settings.connect('changed::subreddits', Lang.bind(this, this._updateSubreddits));
+
+        let latestFile = this._getLatestFile();
+        if (latestFile != null) {
+            this._nextWallpaper = new Gio.FileIcon({ file: latestFile });
+        }
     },
 
     _updateSubreddits: function () {
@@ -79,7 +85,7 @@ const WallpaperDownloader = new Lang.Class({
         print('Waller: Updated subreddits');
     },
 
-    _updateInterval: function (init) {
+    _updateInterval: function () {
         this.timer.setInterval(this._settings.get_int('interval'));
         this.timer.start();
         print('Waller: Updated interval');
@@ -87,7 +93,11 @@ const WallpaperDownloader = new Lang.Class({
 
     init: function () {
         this._fillQueue(Lang.bind(this, function () {
-            this._getNewWallpaper();
+            if (this._nextWallpaper == null) {
+                this._getNewWallpaper();
+            } else if (this._callback != null) {
+                this._callback(this._nextWallpaper);
+            }
         }));
     },
 
@@ -120,15 +130,11 @@ const WallpaperDownloader = new Lang.Class({
         return wallpaper;
     },
 
-    deleteHistory: function () {
-        let nextWallpaperName = this._nextWallpaper != null ? this._nextWallpaper.get_file().get_basename() : null;
-        let currentWallpaperName = this._currentWallpaper != null ? this._currentWallpaper.get_file().get_basename() : null;
-
+    doForEachWallpaper: function (callback) {
         let directory = Gio.file_new_for_path(WALLPAPER_LOCATION);
         let enumerator = directory.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
 
         let fileInfo;
-        let deleteFile;
 
         do {
             fileInfo = enumerator.next_file(null);
@@ -138,14 +144,43 @@ const WallpaperDownloader = new Lang.Class({
             }
 
             let name = fileInfo.get_name();
+            let file = Gio.file_new_for_path(WALLPAPER_LOCATION + name);
 
-            if (name[0] != '.' && name != nextWallpaperName && name != currentWallpaperName) {
-                deleteFile = Gio.file_new_for_path(WALLPAPER_LOCATION + name);
-                deleteFile.delete(null);
-            }
+            callback(file);
         } while (fileInfo);
 
         enumerator.close(null);
+    },
+
+    _getLatestFile: function() {
+        let latestFile;
+        let latestTime;
+
+        this.doForEachWallpaper(Lang.bind(this, function(file) {
+            let fileInfo = file.query_info(Gio.FILE_ATTRIBUTE_TIME_MODIFIED, Gio.FileQueryInfoFlags.NONE, null);
+            let time = fileInfo.get_modification_time().tv_sec;
+
+            if (latestFile == null || time > latestTime) {
+                latestTime = time;
+                latestFile = file;
+            }
+        }));
+
+        return latestFile;
+    },
+
+    deleteHistory: function () {
+        let nextWallpaperName = this._nextWallpaper != null ? this._nextWallpaper.get_file().get_basename() : null;
+        let currentWallpaperName = this._currentWallpaper != null ? this._currentWallpaper.get_file().get_basename() : null;
+
+        this.doForEachWallpaper(Lang.bind(this, function(file) {
+            let fileInfo = file.query_info(Gio.FILE_ATTRIBUTE_STANDARD_NAME, Gio.FileQueryInfoFlags.NONE, null);
+            let name = fileInfo.get_name();
+
+            if (name != currentWallpaperName && name != nextWallpaperName) {
+                file.delete(null);
+            }
+        }));
     },
 
     destory: function () {
