@@ -27,11 +27,11 @@ const WallerIndicator = new Lang.Class({
 
     _hasInitializedWallpaper: false,
 
-    _init: function () {
+    _init: function() {
         this.parent(0, 'WallerIndicator');
 
         this.wallpaperDownloader = new Wall.WallpaperDownloader(Lang.bind(this, this._updateWallpaper));
-        this.wallpaperDownloader.setCallback(Lang.bind(this, function (wallpaper) {
+        this.wallpaperDownloader.setCallback(Lang.bind(this, function(wallpaper) {
             this.wallpaperButton.setPreview(wallpaper);
 
             if (!this._hasInitializedWallpaper && UPDATE_WALLPAPER_ON_LAUNCH) {
@@ -57,22 +57,22 @@ const WallerIndicator = new Lang.Class({
         this.wallpaperDownloader.init();
     },
 
-    _updatePanelIconVisibility: function () {
+    _updatePanelIconVisibility: function() {
         this.actor.visible = this._settings.get_boolean('show-panel-icon');
         print('Waller: Updated icon visibility');
     },
 
-    _updateLockscreenWallpaperSetting: function () {
+    _updateLockscreenWallpaperSetting: function() {
         UPDATE_LOCKSCREEN_WALLPAPER = this._settings.get_boolean('update-lockscreen-wallpaper');
         print('Waller: Updated lockscreen wallpaper setting');
     },
 
-    _updateWallpaperOnLaunchSetting: function () {
+    _updateWallpaperOnLaunchSetting: function() {
         UPDATE_WALLPAPER_ON_LAUNCH = this._settings.get_boolean('update-on-launch');
         print('Waller: Updated on launch setting');
     },
 
-    _setupPanelIcon: function () {
+    _setupPanelIcon: function() {
         let box = new St.BoxLayout({
             vertical: false,
             style_class: 'panel-status-menu-box'
@@ -87,9 +87,9 @@ const WallerIndicator = new Lang.Class({
         this.actor.add_child(box);
     },
 
-    _setupMenu: function () {
+    _setupMenu: function() {
         this.wallpaperButton = new Wall.PopupWallpaperButton('Next Wallpaper', Wall.getWallpaper());
-        this.wallpaperButton.connect('activate', Lang.bind(this, function () {
+        this.wallpaperButton.connect('activate', Lang.bind(this, function() {
             this._updateWallpaper();
         }));
         this.menu.addMenuItem(this.wallpaperButton);
@@ -109,15 +109,15 @@ const WallerIndicator = new Lang.Class({
         this.menu.addMenuItem(settingsMenuItem);
     },
 
-    _openSettings: function () {
+    _openSettings: function() {
         Util.spawn(["gnome-shell-extension-prefs", Me.uuid]);
     },
 
-    _openWallpapersFolder: function () {
+    _openWallpapersFolder: function() {
         Utils.launchForUri(GLib.filename_to_uri(wallpaperLocation, ''));
     },
 
-    _updateWallpaper: function () {
+    _updateWallpaper: function() {
         let wallpaper = this.wallpaperDownloader.getWallpaper();
 
         Wall.setWallpaper(wallpaper);
@@ -129,7 +129,7 @@ const WallerIndicator = new Lang.Class({
         return true;
     },
 
-    destory: function () {
+    destory: function() {
         this.parent();
 
         this.wallpaperDownloader.destory();

@@ -11,7 +11,7 @@ const Settings = new Lang.Class({
 
     _ready: false,
 
-    _init: function () {
+    _init: function() {
         this._settings = Utils.getSettings();
 
         this._builder = new Gtk.Builder();
@@ -28,11 +28,11 @@ const Settings = new Lang.Class({
         this._builder.connect_signals_full(Lang.bind(this, this._connector));
     },
 
-    _connector: function (builder, object, signal, handler) {
+    _connector: function(builder, object, signal, handler) {
         object.connect(signal, Lang.bind(this, this._SignalHandler[handler]));
     },
 
-    _bindSettings: function () {
+    _bindSettings: function() {
         let loadedSubreddits = this._settings.get_strv('subreddits');
         let addIterator;
 
@@ -62,20 +62,20 @@ const Settings = new Lang.Class({
             Gio.SettingsBindFlags.DEFAULT);
     },
 
-    _addSubredditFromInput: function () {
+    _addSubredditFromInput: function() {
         let iterator = this._subredditStore.append();
         this._subredditStore.set_value(iterator, SUBREDDITS_COL, this._subredditInput.get_text());
         this._subredditInput.delete_text(0, -1);
     },
 
-    _removeSelectedSubreddit: function () {
+    _removeSelectedSubreddit: function() {
         let [isSuccess, model, iter] = this._selection.get_selected();
         if (isSuccess) {
             model.remove(iter);
         }
     },
 
-    _saveSubreddits: function () {
+    _saveSubreddits: function() {
         if (!this._ready) {
             this._ready = true;
             return;
@@ -95,19 +95,19 @@ const Settings = new Lang.Class({
     },
 
     _SignalHandler: {
-        addSubredditButton_clicked_cb: function (button) {
+        addSubredditButton_clicked_cb: function(button) {
             this._addSubredditFromInput();
         },
 
-        removeSubredditButton_clicked_cb: function (button) {
+        removeSubredditButton_clicked_cb: function(button) {
             this._removeSelectedSubreddit();
         },
 
-        subredditInput_activate_cb: function (input) {
+        subredditInput_activate_cb: function(input) {
             this._addSubredditFromInput();
         },
 
-        window_screen_changed_cb: function (window) {
+        window_screen_changed_cb: function(window) {
             this._saveSubreddits();
         }
     }

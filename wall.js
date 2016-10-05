@@ -20,7 +20,7 @@ const PopupWallpaperButton = new Lang.Class({
     Name: 'PopupWallpaperButton',
     Extends: PopupMenu.PopupBaseMenuItem,
 
-    _init: function (text, wallpaper) {
+    _init: function(text, wallpaper) {
         this.parent();
 
         let box = new St.BoxLayout({ vertical: true });
@@ -42,11 +42,11 @@ const PopupWallpaperButton = new Lang.Class({
         this.actor.add_actor(box);
     },
 
-    setPreview: function (wallpaper) {
+    setPreview: function(wallpaper) {
         this._thumbnail.set_gicon(wallpaper);
     },
 
-    _viewWallpaper: function () {
+    _viewWallpaper: function() {
         let uri = this._thumbnail.get_gicon().get_file().get_uri();
         Utils.launchForUri(uri);
     }
@@ -62,7 +62,7 @@ const WallpaperDownloader = new Lang.Class({
     _subreddits: ['wallpapers'],
     _settings: null,
 
-    _init: function (tickCallback) {
+    _init: function(tickCallback) {
         this.timer = new Timer.Timer();
         this.timer.setCallback(tickCallback);
 
@@ -80,19 +80,19 @@ const WallpaperDownloader = new Lang.Class({
         }
     },
 
-    _updateSubreddits: function () {
+    _updateSubreddits: function() {
         this._subreddits = this._settings.get_strv('subreddits');
         print('Waller: Updated subreddits');
     },
 
-    _updateInterval: function () {
+    _updateInterval: function() {
         this.timer.setInterval(this._settings.get_int('interval'));
         this.timer.start();
         print('Waller: Updated interval');
     },
 
-    init: function () {
-        this._fillQueue(Lang.bind(this, function () {
+    init: function() {
+        this._fillQueue(Lang.bind(this, function() {
             if (this._nextWallpaper == null) {
                 this._getNewWallpaper();
             } else if (this._callback != null) {
@@ -101,7 +101,7 @@ const WallpaperDownloader = new Lang.Class({
         }));
     },
 
-    setCallback: function (callback) {
+    setCallback: function(callback) {
         if (callback === undefined || callback === null || typeof callback !== 'function') {
             throw TypeError('"callback" needs to be a function.');
         }
@@ -109,18 +109,18 @@ const WallpaperDownloader = new Lang.Class({
         this._callback = callback;
     },
 
-    setSubreddits: function (subreddits) {
+    setSubreddits: function(subreddits) {
         this._subreddits = subreddits;
     },
 
-    getWallpaper: function () {
+    getWallpaper: function() {
         let wallpaper = this._nextWallpaper;
         this._currentWallpaper = wallpaper;
 
         print("Waller: Getting wallpaper");
 
         if (this._queue.length == 0) {
-            this._fillQueue(Lang.bind(this, function () {
+            this._fillQueue(Lang.bind(this, function() {
                 this._getNewWallpaper();
             }));
         } else {
@@ -130,7 +130,7 @@ const WallpaperDownloader = new Lang.Class({
         return wallpaper;
     },
 
-    doForEachWallpaper: function (callback) {
+    doForEachWallpaper: function(callback) {
         let directory = Gio.file_new_for_path(WALLPAPER_LOCATION);
         let enumerator = directory.enumerate_children('', Gio.FileQueryInfoFlags.NONE, null);
 
@@ -169,7 +169,7 @@ const WallpaperDownloader = new Lang.Class({
         return latestFile;
     },
 
-    deleteHistory: function () {
+    deleteHistory: function() {
         let nextWallpaperName = this._nextWallpaper != null ? this._nextWallpaper.get_file().get_basename() : null;
         let currentWallpaperName = this._currentWallpaper != null ? this._currentWallpaper.get_file().get_basename() : null;
 
@@ -183,16 +183,16 @@ const WallpaperDownloader = new Lang.Class({
         }));
     },
 
-    destory: function () {
+    destory: function() {
         this.parent();
 
         this.timer.stop();
     },
 
-    _getNewWallpaper: function () {
+    _getNewWallpaper: function() {
         print("Waller: Getting new wallpaper");
 
-        this._fetchFile(this._queue.pop(), Lang.bind(this, function (wallpaper) {
+        this._fetchFile(this._queue.pop(), Lang.bind(this, function(wallpaper) {
             this._nextWallpaper = wallpaper;
 
             if (this._callback !== null) {
@@ -202,7 +202,7 @@ const WallpaperDownloader = new Lang.Class({
         }));
     },
 
-    _shuffle: function (array) {
+    _shuffle: function(array) {
         let j, x, i;
         for (i = array.length; i; i--) {
             j = Math.floor(Math.random() * i);
@@ -212,7 +212,7 @@ const WallpaperDownloader = new Lang.Class({
         }
     },
 
-    _fillQueue: function (callback) {
+    _fillQueue: function(callback) {
         let subreddit = this._subreddits[Math.floor(Math.random() * this._subreddits.length)];
         let downloadLink = 'https://reddit.com/r/' + subreddit + '/top.json?limit=100';
 
@@ -221,13 +221,13 @@ const WallpaperDownloader = new Lang.Class({
 
         let parser = new Json.Parser();
 
-        session.queue_message(message, Lang.bind(this, function (session, message) {
+        session.queue_message(message, Lang.bind(this, function(session, message) {
             parser.load_from_data(message.response_body.data, -1);
 
             let rootData = parser.get_root().get_object().get_object_member('data');
             let children = rootData.get_array_member('children');
 
-            children.foreach_element(Lang.bind(this, function (array, index, element, d) {
+            children.foreach_element(Lang.bind(this, function(array, index, element, d) {
                 let data = element.get_object().get_object_member('data');
                 let imageUrl = data.get_string_member('url');
 
@@ -252,7 +252,7 @@ const WallpaperDownloader = new Lang.Class({
         }));
     },
 
-    _fetchFile: function (url, callback) {
+    _fetchFile: function(url, callback) {
         let date = new Date();
         let name = date.getTime() + url.substr(url.lastIndexOf('.'));
 
@@ -261,7 +261,7 @@ const WallpaperDownloader = new Lang.Class({
 
         let inputFile = Gio.file_new_for_uri(url);
 
-        inputFile.load_contents_async(null, function (file, result) {
+        inputFile.load_contents_async(null, function(file, result) {
             let contents = file.load_contents_finish(result)[1];
             outputStream.write(contents, null);
 
