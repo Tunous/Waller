@@ -63,9 +63,16 @@ const Settings = new Lang.Class({
     },
 
     _addSubredditFromInput: function() {
-        let iterator = this._subredditStore.append();
-        this._subredditStore.set_value(iterator, SUBREDDITS_COL, this._subredditInput.get_text());
+        let subredditName = this._subredditInput.get_text();
+
         this._subredditInput.delete_text(0, -1);
+
+        if (!subredditName || /^\s*$/.test(subredditName)) {
+            return;
+        }
+
+        let iterator = this._subredditStore.append();
+        this._subredditStore.set_value(iterator, SUBREDDITS_COL, subredditName);
     },
 
     _removeSelectedSubreddit: function() {
