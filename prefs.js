@@ -22,6 +22,9 @@ const Settings = new Lang.Class({
         this._subredditStore = this._builder.get_object('subredditStore');
         this._subredditInput = this._builder.get_object('subredditInput');
         this._selection = this._builder.get_object('subredditSelection');
+        this._removeSubredditButton = this._builder.get_object('removeSubredditButton');
+
+        this._removeSubredditButton.sensitive = this._selection.count_selected_rows() > 0;
 
         this._bindSettings();
 
@@ -116,6 +119,10 @@ const Settings = new Lang.Class({
 
         window_screen_changed_cb: function(window) {
             this._saveSubreddits();
+        },
+
+        subredditSelection_changed_cb: function(selection) {
+            this._removeSubredditButton.sensitive = selection.count_selected_rows() > 0;
         }
     }
 });
