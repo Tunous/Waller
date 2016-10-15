@@ -79,7 +79,7 @@ const WallerIndicator = new Lang.Class({
         });
 
         let icon = new St.Icon({
-            icon_name: 'system-run-symbolic',
+            icon_name: 'emblem-photos-symbolic',
             style_class: 'system-status-icon'
         });
 
