@@ -17,6 +17,7 @@ all: extension
 
 clean:
 	rm -f ./schemas/gschemas.compiled
+	rm -f ./$(UUID).zip
 
 extension: ./schemas/gschemas.compiled
 
@@ -43,3 +44,9 @@ build: all
 
 uninstall:
 	rm -rf $(INSTALL_PATH)/$(INSTALL_NAME)
+
+zip: build
+	cd build ; \
+	zip -qr "$(UUID).zip" .
+	mv "build/$(UUID).zip" ./
+	rm -rf build
