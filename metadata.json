@@ -2,7 +2,9 @@
     "name": "Waller",
     "description": "Download random wallpapers from Reddit.",
     "shell-version": [
-        "3.20"
+        "3.20",
+        "3.22"
     ],
-    "uuid": "waller@thanel.me"
+    "uuid": "waller@thanel.me",
+    "version": 1
 }
